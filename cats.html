@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cat Chess - Play vs a Cat</title>
+<link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:'Courier New',monospace;color:#fff;text-align:center;background:#000 url('IMG_1692.jpeg') left center/cover no-repeat fixed}
+body::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:0}
+.wrap{position:relative;z-index:1;padding:20px 12px;max-width:560px;margin:0 auto}
+h1{margin:6px 0 4px;letter-spacing:3px;text-shadow:3px 3px 0 #ff1493}
+a.back{color:#fff;display:inline-block;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.cat{background:rgba(0,0,0,.75);border:4px solid #fff;box-shadow:5px 5px 0 #ff1493;padding:12px;cursor:pointer;transition:transform .12s}
+.cat:hover{transform:translate(-3px,-3px)}
+.cat img{width:100%;max-width:130px;height:130px;object-fit:contain;background:#fff;border:3px solid #000;border-radius:10px}
+.cat b{display:block;margin-top:8px}
+.cat small{color:#ccc}
+#game{display:none}
+#catface{width:80px;height:80px;object-fit:contain;background:#fff;border:3px solid #000;border-radius:10px}
+.top{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:10px}
+#bubble{background:#fff;color:#000;border:3px solid #000;padding:10px;border-radius:10px;min-height:48px;text-align:left;flex:1}
+#board{width:100%;max-width:480px;margin:0 auto}
+#status{margin:10px 0;min-height:24px}
+button{font-family:inherit;font-size:1rem;padding:10px 16px;border:3px solid #fff;background:#000;color:#fff;cursor:pointer;margin:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; Back</a>
+  <h1>PICK YOUR CAT</h1>
+
+  <div id="pick" class="grid"></div>
+
+  <div id="game">
+    <div class="top">
+      <img id="catface" src="" alt="">
+      <div id="bubble"></div>
+    </div>
+    <div id="board"></div>
+    <div id="status"></div>
+    <button onclick="newGame()">New game</button>
+    <button onclick="backToPick()">Change cat</button>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+<script>
+/* ===== THE CATS ===== */
+const CATS = [
+  { id:'67', name:'Cat 67', img:'IMG_1703.png', rating:'900', elo:null, random:true,
+    c1:'#39ff14', c2:'#7a1fa2', opening:'The 67 Opening',
+    hello:['Hello 67! How are you 67? I hope we play 67 67 67!','67 67 67 67 67... lets play 67!'],
+    taunt:['67 67 67 67 67','Focus focus... 67!','67676767 you cannot stop the 67','Nice move? No. 67!'],
+    win:['I win! 67 67 67 67!'], lose:['You won?! 67676767676767 I am so mad!!'] },
+  { id:'bobby', name:'BOBBY', img:'IMG_1708.png', rating:'Unknown (changes)', heads:true,
+    c1:'#d62828', c2:'#1d4ed8', opening:'The Three Minds',
+    hello:['We are Bobby. All three of us. Do not look at the red one.'],
+    win:['Three minds, one victory.'], lose:['The three of us lost. We will argue about it for a year.'] },
+  { id:'obsessed', name:'The Obsessed Cat', img:'IMG_1705.png', rating:'3000', elo:3000,
+    c1:'#d4af37', c2:'#111111', opening:'My Own Opening (you would not understand)',
+    hello:['Oh, another victim. Please try not to embarrass yourself too quickly.','Chess is my entire life. It is clearly not yours.'],
+    taunt:['Hm. Is that really what you wanted to play?','Interesting. Wrong, but interesting.','Do you even know why you moved there?','I have seen beginners play better. Sit up straight.'],
+    win:['As expected. Study more.'], lose:['Impossible... that was luck. Pure luck.'] },
+  { id:'musical', name:'The Musical Cat', img:'IMG_1706.png', rating:'1700', elo:1700,
+    c1:'#bcd4e6', c2:'#6b7280', opening:'The Quiet Fugue',
+    hello:['Hm. Hello. Lets play.','Quiet. Chess is a kind of music, you know.'],
+    taunt:['That note was a little flat.','Bold. Not good, but bold.','Hm.','I have heard worse.'],
+    win:['A calm victory.'], lose:['Well played. The silence is mine.'] },
+  { id:'ghost', name:'The Ghost Cat', img:'IMG_1707.png', rating:'700', elo:null, weak:true,
+    c1:'#ffffff', c2:'#8fa8d6', opening:'The Spooky Opening',
+    hello:['Boo! Oh, hello. Are you real? Can I touch your pieces?','I am a ghost. Wanna play? Why is your knee a horse?'],
+    taunt:['Ooooh, what does that one do?','Spooky move!','I forgot my pieces were alive...','Do you ever feel cold?'],
+    win:['I won? I thought I was only haunting.'], lose:['You defeated a ghost. Congratulations?'] }
+];
+
+/* ===== STOCKFISH ===== */
+let engine = null, engineReady = false;
+function startEngine(){
+  if(engine) return;
+  const url = 'https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js';
+  fetch(url).then(r=>r.text()).then(t=>{
+    const blob = new Blob([t], {type:'application/javascript'});
+    engine = new Worker(URL.createObjectURL(blob));
+    engine.onmessage = e => onEngine(String(e.data));
+    engine.postMessage('uci');
+  }).catch(()=>{ engine = null; });
+}
+
+let game = new Chess(), board = null, cat = null, headIdx = 0, over = false;
+const HEADS = [
+  {name:'Red', elo:2100, c1:'#d62828', c2:'#7a1010', say:['No time! Move! MOVE!','Philosophy is for losers, attack!','Too slow!']},
+  {name:'Blue', elo:1900, c1:'#1d4ed8', c2:'#0b1f5c', say:['Are we sure about this?','I do not trust that move. Or ours.','Maybe we are lost...']},
+  {name:'Yellow', elo:2800, c1:'#facc15', c2:'#5c4a00', say:['Every move is a question the board must answer.','Interesting. I see where this is going.','Silence is also a move.']}
+];
+
+function pickRand(a){ return a[Math.floor(Math.random()*a.length)]; }
+function say(t){ document.getElementById('bubble').textContent = t; }
+
+/* ===== BOARD COLORS ===== */
+function paint(c1, c2){
+  let st = document.getElementById('boardcss');
+  if(!st){ st = document.createElement('style'); st.id='boardcss'; document.head.appendChild(st); }
+  st.textContent = '.white-1e1d7{background-color:'+c1+'!important;color:'+c2+'!important}.black-3c85d{background-color:'+c2+'!important;color:'+c1+'!important}';
+}
+
+/* ===== PICK SCREEN ===== */
+function buildPick(){
+  const el = document.getElementById('pick');
+  CATS.forEach(c=>{
+    const d = document.createElement('div');
+    d.className='cat';
+    d.innerHTML = '<img src="'+c.img+'" alt=""><b>'+c.name+'</b><small>'+c.rating+'</small>';
+    d.onclick = ()=>chooseCat(c);
+    el.appendChild(d);
+  });
+}
+function chooseCat(c){
+  cat = c;
+  document.getElementById('pick').style.display='none';
+  document.querySelector('h1').style.display='none';
+  document.getElementById('game').style.display='block';
+  document.getElementById('catface').src = c.img;
+  startEngine();
+  newGame();
+}
+function backToPick(){
+  document.getElementById('pick').style.display='grid';
+  document.querySelector('h1').style.display='block';
+  document.getElementById('game').style.display='none';
+}
+
+/* ===== GAME ===== */
+function newGame(){
+  game = new Chess(); over = false;
+  headIdx = 0;
+  if(cat.heads){ applyHead(); } else { paint(cat.c1, cat.c2); }
+  if(board) board.destroy();
+  board = Chessboard('board', {
+    draggable:true, position:'start',
+    pieceTheme:'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
+    onDragStart: (s,p)=> !over && game.turn()==='w' && p[0]==='w',
+    onDrop: onDrop,
+    onSnapEnd: ()=> board.position(game.fen())
+  });
+  say(pickRand(cat.hello || ['Lets play!']));
+  document.getElementById('status').textContent = 'You are White. Your move.';
+}
+function applyHead(){
+  const h = HEADS[headIdx];
+  paint(h.c1, h.c2);
+}
+
+function onDrop(from, to){
+  const m = game.move({from:from, to:to, promotion:'q'});
+  if(m === null) return 'snapback';
+  if(cat.taunt && Math.random() < 0.55) say(pickRand(cat.taunt));
+  checkEnd();
+  if(!over) setTimeout(catMove, 450);
+}
+
+function checkEnd(){
+  if(game.game_over()){
+    over = true;
+    if(game.in_checkmate()){
+      const playerWon = game.turn()==='b';
+      say(pickRand(playerWon ? cat.lose : cat.win));
+      document.getElementById('status').textContent = playerWon ? 'You won!' : 'You lost.';
+    } else {
+      say('A draw... hm.');
+      document.getElementById('status').textContent = 'Draw.';
+    }
+  }
+}
+
+function randomMove(){
+  const mv = game.moves();
+  if(!mv.length) return;
+  game.move(pickRand(mv));
+  board.position(game.fen());
+  checkEnd();
+}
+
+function catMove(){
+  if(over) return;
+  if(cat.heads){
+    headIdx = Math.floor(Math.random()*3);
+    applyHead();
+    say(pickRand(HEADS[headIdx].say));
+  }
+  if(cat.random){ randomMove(); return; }
+  if(cat.weak && Math.random() < 0.6){ randomMove(); return; }
+  if(!engine){ randomMove(); return; }
+  const elo = cat.heads ? HEADS[headIdx].elo : cat.elo;
+  engine.postMessage('setoption name UCI_LimitStrength value true');
+  engine.postMessage('setoption name UCI_Elo value ' + Math.max(1320, elo || 1320));
+  engine.postMessage('position fen ' + game.fen());
+  engine.postMessage('go movetime 600');
+}
+
+function onEngine(line){
+  if(line.indexOf('bestmove') === 0){
+    const mv = line.split(' ')[1];
+    if(!mv || mv==='(none)') return;
+    game.move({from:mv.slice(0,2), to:mv.slice(2,4), promotion:mv[4]||'q'});
+    board.position(game.fen());
+    checkEnd();
+    if(!over) document.getElementById('status').textContent = 'Your move.';
+  }
+}
+
+buildPick();
+</script>
+</body>
+</html>
