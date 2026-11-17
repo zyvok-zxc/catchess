@@ -54,9 +54,9 @@ body{margin:0;min-height:100vh;font-family:'Courier New',monospace;color:#fff;te
     <div class="card" onclick="beep(660,.1);alert('Puzzles are coming soon!')">
       🧩 Puzzle Challenge<small>Easy, hard, or random puzzles</small>
     </div>
-<div class="card" onclick="beep(740,.1);setTimeout(function(){location.href='cats.html'},150)">
-  😺 Play vs a Cat<small>Pick one of 15 characters</small>
-</div>
+    <div class="card" onclick="beep(740,.1);setTimeout(function(){location.href='cats.html'},150)">
+      😺 Play vs a Cat<small>Pick one of 15 characters</small>
+    </div>
     <div class="card locked" onclick="beep(150,.25)">
       🔒 Pixel Adventure<small>Under maintenance</small>
     </div>
@@ -75,6 +75,9 @@ function beep(f,d){
 }
 const music=new Audio('glass_horizons.mp3');
 music.loop=true;music.volume=.5;
+music.addEventListener('loadedmetadata',()=>{music.currentTime=+localStorage.getItem('cc_t')||0});
+setInterval(()=>{if(!music.paused)localStorage.setItem('cc_t',music.currentTime)},1000);
+window.addEventListener('pagehide',()=>localStorage.setItem('cc_t',music.currentTime));
 function startSite(){
   ctx=new (window.AudioContext||window.webkitAudioContext)();
   beep(523,.1);
