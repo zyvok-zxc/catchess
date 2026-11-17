@@ -21,13 +21,16 @@ h1{text-shadow:3px 3px 0 #ff1493;letter-spacing:2px}
 .top{display:flex;gap:10px;align-items:center;margin-bottom:8px}
 .top img{width:72px;height:72px;object-fit:contain;background:#fff;border:3px solid #000;border-radius:10px}
 #talk{flex:1;background:#fff;color:#000;border:3px solid #000;border-radius:10px;padding:8px;min-height:50px;text-align:start}
-#bd{direction:ltr;position:relative;width:min(96vw,480px);aspect-ratio:1;margin:8px auto;border:4px solid #fff;touch-action:none;user-select:none}
+.bw{direction:ltr;display:flex;gap:6px;align-items:stretch;width:min(96vw,480px);margin:8px auto}
+#ev{width:22px;flex:none;background:#111;border:3px solid #fff;position:relative}
+#evw{position:absolute;left:0;right:0;bottom:0;height:50%;background:#fff;transition:height .5s}
+#bd{flex:1;min-width:0;position:relative;aspect-ratio:1;border:4px solid #fff;touch-action:none;user-select:none}
 .sq{position:absolute;width:12.5%;height:12.5%}
 .sq.last{box-shadow:inset 0 0 0 100px rgba(255,235,59,.5)}
 .sq.sel{box-shadow:inset 0 0 0 100px rgba(255,235,59,.7)}
 .sq.dot::after{content:"";position:absolute;inset:36%;border-radius:50%;background:rgba(0,0,0,.35)}
 .sq.cap::after{content:"";position:absolute;inset:6%;border-radius:50%;border:5px solid rgba(0,0,0,.35)}
-.pc{position:absolute;width:12.5%;height:12.5%;display:flex;align-items:center;justify-content:center;font-size:min(9vw,44px);line-height:1;transition:left .18s ease,top .18s ease,opacity .2s;cursor:grab;z-index:2}
+.pc{position:absolute;width:12.5%;height:12.5%;display:flex;align-items:center;justify-content:center;font-size:min(11vw,58px);line-height:1;transition:left .18s ease,top .18s ease,opacity .2s;cursor:grab;z-index:2}
 .pc.drag{transition:none;z-index:9;cursor:grabbing}
 .pw{color:#fff;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
 .pb{color:#000;text-shadow:0 0 2px #fff,0 0 2px #fff}
@@ -42,7 +45,8 @@ h1{text-shadow:3px 3px 0 #ff1493;letter-spacing:2px}
   <div id="list"></div>
   <div id="game">
     <div class="top"><img id="face"><div id="talk"></div></div>
-    <div id="bd"></div>
+    <div class="bw"><div id="ev"><div id="evw"></div></div><div id="bd"></div></div>
+    <div id="evn"></div>
     <div id="status"></div>
     <button id="nb"></button><button id="cb"></button>
   </div>
@@ -59,7 +63,6 @@ h1{text-shadow:3px 3px 0 #ff1493;letter-spacing:2px}
 const $=id=>document.getElementById(id);
 const R=a=>a[Math.floor(Math.random()*a.length)];
 
-/* settings */
 const S=JSON.parse(localStorage.getItem('cc')||'{}');
 const st={lang:S.lang||'en',music:S.music!==false,sfx:S.sfx!==false};
 const save=()=>localStorage.setItem('cc',JSON.stringify(st));
@@ -68,7 +71,6 @@ en:{pick:'PICK YOUR CAT',back:'Back',new:'New game',chg:'Change cat',your:'Your 
 ar:{pick:'اختر قطتك',back:'رجوع',new:'لعبة جديدة',chg:'غيّر القطة',your:'دورك',won:'فزت!',lost:'خسرت.',draw:'تعادل.',set:'الإعدادات',lang:'اللغة',mus:'الموسيقى',sfx:'الأصوات',on:'تشغيل',off:'إيقاف',close:'إغلاق'}};
 const t=k=>T[st.lang][k];
 
-/* cats */
 const CATS=[
 {n:'Cat 67',i:'IMG_1703.png',r:{en:'900',ar:'900'},mode:'rand',c:['#39ff14','#7a1fa2'],
  hi:{en:['Hello 67! How are you 67? I hope we play 67!'],ar:['مرحبا 67 كيف الحال 67 أتمنى نلعب 67']},
@@ -101,7 +103,6 @@ const CATS=[
  l:{en:['You defeated a ghost. Congrats?'],ar:['هزمت شبحاً. مبروك؟']}}
 ];
 
-/* sounds + music */
 let ac;
 function snd(k){if(!st.sfx)return;ac=ac||new(window.AudioContext||window.webkitAudioContext)();
  const q={mv:[[330,.05]],cap:[[200,.08],[140,.1]],chk:[[880,.08],[1100,.12]],end:[[523,.12],[659,.12],[784,.12],[1047,.25]]}[k];
@@ -112,15 +113,34 @@ mu.addEventListener('loadedmetadata',()=>{mu.currentTime=+localStorage.getItem('
 setInterval(()=>{if(!mu.paused)localStorage.setItem('cc_t',mu.currentTime)},1000);
 document.addEventListener('pointerdown',()=>{if(st.music)mu.play().catch(()=>{})},{once:true});
 
-/* engine */
-let eng=null,engOK=false,pending=null;
+/* engines: eng plays for the cat, ev only evaluates */
+let eng=null,ev=null,engOK=false,pending=null;
+let evBusy=false,evQ=false,evFen='',ecp=null,emt=null;
+const mk=x=>new Worker(URL.createObjectURL(new Blob([x],{type:'text/javascript'})));
 function startEng(){if(eng)return;
  fetch('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js').then(r=>r.text()).then(x=>{
-  eng=new Worker(URL.createObjectURL(new Blob([x],{type:'text/javascript'})));
+  eng=mk(x);
   eng.onmessage=e=>{const l=String(e.data);if(l=='uciok')engOK=true;
    if(l.startsWith('bestmove')&&pending){const p=pending;pending=null;p(l.split(' ')[1])}};
   eng.postMessage('uci');
+  ev=mk(x);
+  ev.onmessage=e=>{const l=String(e.data),m=l.match(/score (cp|mate) (-?\d+)/);
+   if(m){ecp=m[1]=='cp'?+m[2]:null;emt=m[1]=='mate'?+m[2]:null}
+   if(l.startsWith('bestmove')){evBusy=false;showEval();if(evQ){evQ=false;evalNow()}}};
+  ev.postMessage('uci');evalNow();
  }).catch(()=>{})}
+function evalNow(){
+ if(!ev||over)return;
+ if(evBusy){evQ=true;return}
+ evBusy=true;ecp=emt=null;evFen=G.fen();
+ ev.postMessage('position fen '+evFen);ev.postMessage('go movetime 250')}
+function bar(p,l){$('evw').style.height=p+'%';$('evn').textContent=l}
+function showEval(){
+ if(over||(ecp===null&&emt===null))return;
+ const s=evFen.split(' ')[1]=='w'?1:-1;
+ if(emt!==null){const w=s*emt>0;bar(w?100:0,(w?'+':'-')+'M'+Math.abs(emt));return}
+ const c=s*ecp;
+ bar(50+50*(2/(1+Math.exp(-c/400))-1),(c>=0?'+':'')+(c/100).toFixed(1))}
 
 /* board */
 let G,cat,over=false,sel=null,last=[],hd=0,busy=false,drag=null;
@@ -183,6 +203,7 @@ function apply(m){
  if(m.promotion)e.textContent=GL[m.promotion]+'\uFE0E';
  last=[m.from,m.to];marks();
  snd(G.game_over()?'end':G.in_check()?'chk':m.captured?'cap':'mv');
+ if(G.in_checkmate())bar(G.turn()=='b'?100:0,'#');else evalNow();
  if(!endCheck()&&m.color=='w'){taunt();busy=true;setTimeout(catMove,650)}}
 function taunt(){
  if(G.history().length==1&&cat.op)say(cat.op[st.lang]);
@@ -191,7 +212,9 @@ function endCheck(){
  if(!G.game_over())return false;
  over=true;let k='draw';
  if(G.in_checkmate()){const pw=G.turn()=='b';say(R((pw?cat.l:cat.w)[st.lang]));k=pw?'won':'lost'}else say('...');
- $('status').textContent=t(k);return true}
+ $('status').textContent=t(k);
+ localStorage.setItem('cc_game',JSON.stringify({pgn:G.pgn(),cat:cat.n}));
+ return true}
 function catMove(){
  if(over)return;
  if(cat.h){hd=Math.floor(Math.random()*3);paint();say(R(cat.h[hd].tk[st.lang]))}
@@ -206,14 +229,13 @@ function catMove(){
  eng.postMessage('position fen '+G.fen());
  eng.postMessage('go movetime '+Math.round(300+elo/6))}
 
-/* screens */
 function go(i){
  cat=CATS[i];startEng();
  $('list').style.display='none';$('h').style.display='none';$('game').style.display='block';
  $('face').src=cat.i;newGame()}
 function newGame(){
  G=new Chess();over=false;sel=null;last=[];busy=false;hd=0;
- build();paint();say(R(cat.hi[st.lang]));$('status').textContent=t('your')}
+ build();paint();bar(50,'0.0');say(R(cat.hi[st.lang]));$('status').textContent=t('your')}
 function ui(){
  document.documentElement.dir=st.lang=='ar'?'rtl':'ltr';
  $('h').textContent=t('pick');$('bk').textContent='← '+t('back');$('sb').textContent='⚙ '+t('set');
