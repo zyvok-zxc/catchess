@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cat Chess - Review</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:'Courier New',monospace;color:#fff;text-align:center;background:#000 url(IMG_1692.jpeg) left/cover fixed}
+body::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.75)}
+.w{position:relative;max-width:520px;margin:auto;padding:14px 10px}
+a{color:#fff}
+h1{text-shadow:3px 3px 0 #ff1493;letter-spacing:2px}
+.box{background:rgba(0,0,0,.7);border:3px solid #fff;box-shadow:4px 4px 0 #ff1493;padding:12px;margin:12px 0}
+.row{display:flex;align-items:center;gap:10px;padding:6px 0;text-align:start}
+.row span.n{flex:1}
+.b{display:inline-flex;flex:none;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;font-weight:bold;color:#000;background:var(--c);box-shadow:0 0 8px var(--c)}
+.gb{animation:gl .5s steps(2) infinite}
+@keyframes gl{
+0%{transform:translate(0);box-shadow:0 0 8px #f0f}
+25%{transform:translate(-2px,1px);box-shadow:3px 0 #0ff,-3px 0 #f0f}
+50%{transform:translate(2px,-1px);box-shadow:-3px 0 #0ff,3px 0 #f0f}
+75%{transform:translate(-1px,-2px);box-shadow:3px 0 #f0f,-3px 0 #0ff}
+100%{transform:translate(0)}}
+</style>
+</head>
+<body>
+<div class="w">
+  <a id="bk" href="cats.html"></a>
+  <h1 id="h"></h1>
+  <div id="pg"></div>
+  <div id="sum" class="box" style="display:none"></div>
+  <div id="mv" class="box" style="display:none"></div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const st=JSON.parse(localStorage.getItem('cc')||'{}'),ar=st.lang=='ar';
+const D=JSON.parse(localStorage.getItem('cc_game')||'null');
+document.documentElement.dir=ar?'rtl':'ltr';
+$('bk').textContent=(ar?'→ رجوع':'← Back');
+$('h').textContent=ar?'مراجعة المباراة':'GAME REVIEW';
+
+const K=[
+['gb','✦','#ff00ff','Glitch Brilliant','جليتش بريليانت'],
+['br','✦','#22d3ee','Brilliant','بريليانت'],
+['ex','♥','#4ade80','Excellent','ممتازة'],
+['gd','✓','#ffffff','Good','جيدة'],
+['in','?','#facc15','Inaccuracy','غير دقيقة'],
+['mi','!','#fb923c','Mistake','خطأ'],
+['bl','☠','#ef4444','Blunder','بلاندر']];
+const KM={};K.forEach(k=>KM[k[0]]=k);
+const badge=k=>'<span class="b '+(k=='gb'?'gb':'')+'" style="--c:'+KM[k][2]+'">'+KM[k][1]+'</span>';
+const V={p:1,n:3,b:3,r:5,q:9,k:0};
+
+if(!D){$('pg').textContent=ar?'ما في مباراة محفوظة. العب مباراة أول.':'No saved game. Play a game first.'}
+else{
+ const g=new Chess();
+ g.load_pgn(D.pgn);
+ const hist=g.history({verbose:true});
+ const r=new Chess(),fens=[r.fen()];
+ hist.forEach(m=>{r.move(m.san);fens.push(r.fen())});
+
+ function isSac(fen,san){
+  const x=new Chess(fen),m=x.move(san);
+  if(!m||V[m.piece]<3)return false;
+  if(m.captured&&V[m.captured]>=V[m.piece])return false;
+  return x.moves({verbose:true}).some(y=>y.to==m.to&&y.captured)}
+
+ function done(E,B){
+  let streak=0;const cnt={};K.forEach(k=>cnt[k[0]]=0);let rows='';
+  hist.forEach((m,j)=>{
+   if(j%2)return;
+   const loss=Math.max(0,E[j]-E[j+1]);
+   let k;
+   if(loss<=20&&E[j+1]>=-150&&E[j]<600&&isSac(fens[j],m.san))k='br';
+   else k=loss<=20?'ex':loss<=60?'gd':loss<=130?'in':loss<=300?'mi':'bl';
+   if(k=='br'){streak++;if(streak==5){k='gb';streak=0}}else streak=0;
+   cnt[k]++;
+   rows+='<div class="row">'+badge(k)+'<span class="n">'+(Math.floor(j/2)+1)+'. '+m.san+'</span><span>'+KM[k][ar?4:3]+'</span></div>'});
+  $('pg').style.display='none';
+  $('sum').style.display='block';$('mv').style.display='block';
+  $('sum').innerHTML=K.map(k=>'<div class="row">'+badge(k[0])+'<span class="n">'+k[ar?4:3]+'</span><b>'+cnt[k[0]]+'</b></div>').join('');
+  $('mv').innerHTML=rows}
+
+ const E=[],B=[];let i=0,cp=0,mt=null,w;
+ function run(){
+  $('pg').textContent=(ar?'جاري التحليل ':'Analyzing ')+i+'/'+fens.length;
+  cp=0;mt=null;
+  const z=new Chess(fens[i]);
+  if(z.game_over()){
+   E[i]=z.in_checkmate()?(z.turn()=='w'?-1000:1000):0;B[i]='';i++;
+   if(i<fens.length)run();else done(E,B);
+   return}
+  w.postMessage('position fen '+fens[i]);
+  w.postMessage('go movetime 180')}
+ fetch('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js').then(x=>x.text()).then(x=>{
+  w=new Worker(URL.createObjectURL(new Blob([x],{type:'text/javascript'})));
+  w.onmessage=e=>{
+   const l=String(e.data),m=l.match(/score (cp|mate) (-?\d+)/);
+   if(m){cp=m[1]=='cp'?+m[2]:0;mt=m[1]=='mate'?+m[2]:null}
+   if(l.startsWith('bestmove')){
+    const s=fens[i].split(' ')[1]=='w'?1:-1;
+    const v=mt!==null?(mt>0?1000:-1000):cp;
+    E[i]=Math.max(-1000,Math.min(1000,s*v));B[i]=l.split(' ')[1];
+    i++;
+    if(i<fens.length)run();else done(E,B)}};
+  w.postMessage('uci');run()
+ }).catch(()=>{$('pg').textContent=ar?'تعذر تحميل المحرك.':'Could not load the engine.'})
+}
+</script>
+</body>
+</html>
