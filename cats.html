@@ -34,6 +34,7 @@ h1{text-shadow:3px 3px 0 #ff1493;letter-spacing:2px}
 .pc.drag{transition:none;z-index:9;cursor:grabbing}
 .pw{color:#fff;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
 .pb{color:#000;text-shadow:0 0 2px #fff,0 0 2px #fff}
+#rb{display:none;border-color:#ff1493;box-shadow:0 0 10px #ff1493}
 #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:50;align-items:center;justify-content:center}
 #modal>div{background:#111;border:4px solid #fff;padding:20px;width:min(90vw,340px)}
 </style>
@@ -48,7 +49,7 @@ h1{text-shadow:3px 3px 0 #ff1493;letter-spacing:2px}
     <div class="bw"><div id="ev"><div id="evw"></div></div><div id="bd"></div></div>
     <div id="evn"></div>
     <div id="status"></div>
-    <button id="nb"></button><button id="cb"></button>
+    <button id="nb"></button><button id="cb"></button><button id="rb" onclick="location.href='review.html'"></button>
   </div>
 </div>
 <div id="modal"><div>
@@ -56,63 +57,202 @@ h1{text-shadow:3px 3px 0 #ff1493;letter-spacing:2px}
   <p><button id="bl"></button></p>
   <p><button id="bm"></button></p>
   <p><button id="bs"></button></p>
+  <p><button id="bp"></button></p>
   <button id="bx"></button>
 </div></div>
 
 <script>
 const $=id=>document.getElementById(id);
 const R=a=>a[Math.floor(Math.random()*a.length)];
-
 const S=JSON.parse(localStorage.getItem('cc')||'{}');
-const st={lang:S.lang||'en',music:S.music!==false,sfx:S.sfx!==false};
-const save=()=>localStorage.setItem('cc',JSON.stringify(st));
+const st={lang:S.lang||'en',music:S.music!==false,sfx:S.sfx!==false,px:!!S.px};
+const save=()=>localStorage.setItem('cc',JSON.stringify(Object.assign(JSON.parse(localStorage.getItem('cc')||'{}'),st)));
 const T={
-en:{pick:'PICK YOUR CAT',back:'Back',new:'New game',chg:'Change cat',your:'Your move',won:'You won!',lost:'You lost.',draw:'Draw.',set:'Settings',lang:'Language',mus:'Music',sfx:'Sounds',on:'ON',off:'OFF',close:'Close'},
-ar:{pick:'اختر قطتك',back:'رجوع',new:'لعبة جديدة',chg:'غيّر القطة',your:'دورك',won:'فزت!',lost:'خسرت.',draw:'تعادل.',set:'الإعدادات',lang:'اللغة',mus:'الموسيقى',sfx:'الأصوات',on:'تشغيل',off:'إيقاف',close:'إغلاق'}};
+en:{pick:'PICK YOUR CAT',back:'Back',new:'New game',chg:'Change cat',rev:'Review game',your:'Your move',won:'You won!',lost:'You lost.',draw:'Draw.',set:'Settings',lang:'Language',mus:'Music',sfx:'Sounds',px:'Pieces',pix:'Pixel',nor:'Normal',on:'ON',off:'OFF',close:'Close'},
+ar:{pick:'اختر شخصيتك',back:'رجوع',new:'لعبة جديدة',chg:'غيّر الشخصية',rev:'راجع المباراة',your:'دورك',won:'فزت!',lost:'خسرت.',draw:'تعادل.',set:'الإعدادات',lang:'اللغة',mus:'الموسيقى',sfx:'الأصوات',px:'القطع',pix:'بكسل',nor:'عادية',on:'تشغيل',off:'إيقاف',close:'إغلاق'}};
 const t=k=>T[st.lang][k];
+const L=x=>Array.isArray(x)?x:(x[st.lang]||x.ar||x.en);
 
+/* characters: hi=start, tk=after your move, pc=you lose a piece, cc=it loses a piece, ck=it is in check, sl=you think long, rd=random chat, w=it wins, l=it loses */
 const CATS=[
 {n:'Cat 67',i:'IMG_1703.png',r:{en:'900',ar:'900'},mode:'rand',c:['#39ff14','#7a1fa2'],
  hi:{en:['Hello 67! How are you 67? I hope we play 67!'],ar:['مرحبا 67 كيف الحال 67 أتمنى نلعب 67']},
- tk:{en:['67 67 67 67 67','Focus! Say 67!','67676767','Nice move? No. 67!'],ar:['67 67 67 67 67','ركز! قول 67!','67676767','نقلة حلوة؟ لا. 67!']},
+ tk:{en:['67 67 67 67 67','Focus! Say 67!','67676767'],ar:['67 67 67 67 67','ركز! قول 67!','67676767']},
  op:{en:'This is the 67 Opening! 67!',ar:'هذي افتتاحية 67! 67!'},
  w:{en:['I win! 67 67 67!'],ar:['فزت! 67 67 67!']},
  l:{en:['I lost! 67676767676767'],ar:['لقد خسرت 67676767676767']}},
 {n:'BOBBY',i:'IMG_1708.png',r:{en:'Unknown, changing',ar:'مجهول متغير'},
  h:[
-  {c:['#e63946','#7a1520'],e:2100,tk:{en:['No time to think! MOVE!','Philosophy is for the weak. Attack!','Faster! Faster!'],ar:['لا وقت للتفكير! تحرك!','الفلسفة للضعفاء. هجوم!','أسرع! أسرع!']}},
-  {c:['#2f6bff','#0c1f66'],e:1900,tk:{en:['Are we sure about this?','I do not trust that move. Or ours.','Maybe we are lost...'],ar:['هل نحن متأكدون؟','لا أثق بهذه النقلة. ولا بنقلتنا.','ربما ضعنا...']}},
-  {c:['#ffd60a','#5c4a00'],e:2800,tk:{en:['Every move is a question the board must answer.','Interesting. I see where this is going.','Silence is also a move.'],ar:['كل نقلة سؤال، والرقعة ستجيب.','مثير. أرى إلى أين يسير هذا.','الصمت أيضاً نقلة.']}}],
- hi:{en:['We are three minds in one cat. Do not upset the red one.'],ar:['نحن ثلاثة عقول في قط واحد. لا تغضب الأحمر.']},
+  {c:['#e63946','#7a1520'],e:2100,tk:{en:['No time to think! MOVE!','Attack!'],ar:['لا وقت للتفكير! تحرك!','هجوم!']}},
+  {c:['#2f6bff','#0c1f66'],e:1900,tk:{en:['Are we sure about this?','Maybe we are lost...'],ar:['هل نحن متأكدون؟','ربما ضعنا...']}},
+  {c:['#ffd60a','#5c4a00'],e:2800,tk:{en:['Every move is a question.','Silence is also a move.'],ar:['كل نقلة سؤال.','الصمت أيضاً نقلة.']}}],
+ hi:{en:['We are three minds in one cat.'],ar:['نحن ثلاثة عقول في قط واحد.']},
  w:{en:['Three minds, one victory.'],ar:['ثلاثة عقول، نصر واحد.']},
- l:{en:['We lost. The three of us will argue about it for a year.'],ar:['خسرنا. سنتجادل نحن الثلاثة حول هذا سنة كاملة.']}},
+ l:{en:['We lost. We will argue about it for a year.'],ar:['خسرنا. سنتجادل حول هذا سنة كاملة.']}},
 {n:'The Obsessed Cat',i:'IMG_1705.png',r:{en:'3000',ar:'3000'},e:3000,c:['#d4af37','#1a1a1a'],
- hi:{en:['Another victim. Please try not to embarrass yourself too quickly.'],ar:['ضحية أخرى. حاول ألا تحرج نفسك بسرعة.']},
- tk:{en:['Hm. Is that really what you wanted to play?','Interesting. Wrong, but interesting.','Do you even know why you moved there?','I have seen beginners play better.'],ar:['همم. هل هذا فعلاً ما أردت لعبه؟','مثير. خاطئ، لكنه مثير.','هل تعرف أصلاً لماذا حركتها هناك؟','رأيت مبتدئين يلعبون أفضل.']},
+ hi:{en:['Another victim. Do not embarrass yourself too quickly.'],ar:['ضحية أخرى. حاول ألا تحرج نفسك بسرعة.']},
+ tk:{en:['Is that really what you wanted to play?','I have seen beginners play better.'],ar:['هل هذا فعلاً ما أردت لعبه؟','رأيت مبتدئين يلعبون أفضل.']},
  w:{en:['As expected. Study more.'],ar:['كما توقعت. ادرس أكثر.']},
- l:{en:['Impossible... that was pure luck.'],ar:['مستحيل... كانت مجرد حظ.']}},
+ l:{en:['Impossible... pure luck.'],ar:['مستحيل... مجرد حظ.']}},
 {n:'The Musical Cat',i:'IMG_1706.png',r:{en:'1700',ar:'1700'},e:1700,c:['#cfe3f2','#6b7a8f'],
  hi:{en:['Hm. Hello. Let us play.'],ar:['همم. مرحباً. لنلعب.']},
- tk:{en:['That note was a little flat.','Bold. Not good, but bold.','Hm.','I have heard worse.'],ar:['كانت النغمة نشازاً قليلاً.','جريئة. ليست جيدة، لكنها جريئة.','همم.','سمعت أسوأ.']},
+ tk:{en:['That note was a little flat.','Hm.'],ar:['كانت النغمة نشازاً قليلاً.','همم.']},
  w:{en:['A calm victory.'],ar:['فوز هادئ.']},
  l:{en:['Well played. The silence is yours.'],ar:['لعبت جيداً. الصمت لك.']}},
 {n:'The Ghost Cat',i:'IMG_1707.png',r:{en:'700',ar:'700'},e:700,weak:1,c:['#ffffff','#9db4e0'],
  hi:{en:['Boo! Oh, hello. Are you real?'],ar:['بووو! أوه، مرحباً. هل أنت حقيقي؟']},
- tk:{en:['Ooooh, what does that one do?','Spooky move!','Do you ever feel cold?','Why is that one a horse?'],ar:['أووه، ماذا تفعل هذه؟','نقلة مرعبة!','هل تشعر بالبرد أحياناً؟','لماذا هذه حصان؟']},
+ tk:{en:['Ooooh, what does that one do?','Spooky move!'],ar:['أووه، ماذا تفعل هذه؟','نقلة مرعبة!']},
  w:{en:['I won? I thought I was only haunting.'],ar:['فزت؟ ظننت أني أطارد فقط.']},
- l:{en:['You defeated a ghost. Congrats?'],ar:['هزمت شبحاً. مبروك؟']}}
+ l:{en:['You defeated a ghost. Congrats?'],ar:['هزمت شبحاً. مبروك؟']}},
+
+{n:'Eddie',i:'IMG_1700.jpeg',r:'2500',e:2500,c:['#ff9f1c','#2ec4b6'],
+ hi:['هههه! مستعد تخسر؟','أمي تقول إني غبي... بس أنت ستخسر!'],
+ tk:['ههههههههه! هل رأيت ما فعلته للتو؟','هل فكرت قبل أن تلعب أم كان ذلك بالصدفة؟','هذه ليست غلطة، هذه تحفة فنية.','أعتقد أنك تحتاج إلى إعادة تشغيل.'],
+ pc:['أووووه! كانت قطعة مهمة؟ آسف ما انتبهت.','أنت تلعب شطرنج ولا تتبرع بقطعك؟','أعتقد أن القطعة كانت تبي تهرب منك.'],
+ cc:['لحظة... هذا مو عدل!','هههه، كنت أختبر قطعتي.'],
+ ck:['انتظر، لا تتحرك... أريد أن أتذكر هذه اللحظة.'],
+ sl:['هل أنت تحسب أم تبني منزلاً؟','لقد كبرت وأنا أنتظرك.','حتى السلحفاة اتخذت قرارها.'],
+ rd:['أنا جائع... هل يمكننا أكل الملك؟','نسيت ماذا كنت أقول... المهم أنت سيئ.','أمي قالت لا تسخر من الناس... لكنها لم تقل شيئاً عن الشطرنج.'],
+ w:['أعتقد أنني سأصبح بطلاً عالمياً... بعد الغداء.','لقد هزمتك وأنا لم أنهِ وجبتي حتى!','هل تريد توقيعي؟'],
+ l:['مستحيل! هل لعبت ضد شخص آخر؟','أنت غشاش... أقصد عبقري... قليلاً.','أريد إعادة المباراة، هذه اللعبة معطوبة!']},
+
+{n:'Om',i:'IMG_1745.jpeg',r:'2100',e:2100,c:['#8d99ae','#2b2d42'],
+ hi:['لنبدأ تحقيقنا... أقصد مباراتنا.','انتظر... أشعر أن هناك فخاً.'],
+ tk:['لحظة... لماذا فعلت ذلك؟','أنت تخفي شيئاً، أليس كذلك؟','هل تحاول خداعي؟','إما أنك عبقري أو مجنون.'],
+ pc:['كفى انتظاراً، حان وقت الهجوم!','دفاعك يبدو هشاً جداً.'],
+ cc:['التضحية؟ نعم... بالتأكيد تضحية.','هذه لم تكن ضمن الخطة... تقريباً.'],
+ ck:['ماذا؟! لحظة... ماذا كان ذلك؟','أوه؟ هل هناك شيء لا أراه؟'],
+ sl:['هل أنت متأكد من هذه الحركة؟','سأفترض أنك أذكى مما تبدو.'],
+ rd:['لا تثق بأحد... خصوصاً الحصان.','لا أحب الأشياء السهلة، إنها مملة.','أعتقد أن هذه المباراة أعمق مما تبدو.'],
+ op:'آه، الإيطالية! أحب هذا الافتتاح، إنه أنيق وخطير.',
+ w:['آه! ها هي! كنت أعرف أن هناك شيئاً!','هذا هو الشطرنج الذي أحبه!'],
+ l:['أخيراً... ظهرت الحقيقة.','هل كان كل هذا مخططاً له؟']},
+
+{n:'Green Coat Girl',i:'IMG_1749.jpeg',r:'1987',e:1987,c:['#f4d58d','#bf6a2e'],m:'october_s_last_light.mp3',
+ hi:['أتمنى أن تكون مباراة جميلة.','خذ وقتك، لا داعي للاستعجال.','أحب البدايات الهادئة.'],
+ tk:['يا لها من حركة جميلة!','أحببت طريقة تفكيرك.','أحياناً أبسط الحركات تكون الأجمل.'],
+ pc:['لا بأس، تحدث هذه الأشياء.','ما زال بإمكانك تحسين موقفك.'],
+ cc:['أوه... يبدو أن عليّ الانتباه أكثر.'],
+ ck:['لا داعي للذعر، هناك حل.','حسناً، لنحافظ على هدوئنا.'],
+ sl:['خذ وقتك، لا داعي للاستعجال.'],
+ rd:['هل تعلم؟ أحب صوت المطر عندما أرسم بجانب النافذة.','أتمنى لو أن جميع القطع تستطيع العيش بسلام بدلاً من القتال.'],
+ op:'نظام لندن، افتتاحيتي المفضلة.',
+ w:['كانت مباراة جميلة، شكراً لك.','أتمنى أن تكون قد استمتعت.'],
+ l:['لا بأس، تعلمت شيئاً جديداً.','سأحاول أن أكون أفضل في المرة القادمة.']},
+
+{n:'Amelia',i:'IMG_1747.jpeg',r:'2000',e:2000,c:['#ff1744','#1a1a1a'],
+ hi:['هياااا! لنحطم هذه الرقعة!','اليوم يوم الكوارث!'],
+ tk:['هههههههههه! ما هذا الهراء؟!','هل فقدت عقلك؟!','يا لها من حركة غبية!'],
+ pc:['BOOM! هل رأيت ذلك؟!','هههه! يا لها من كارثة جميلة!'],
+ cc:['تباً! كانت هذه قطعتي المفضلة!','لاااا! ستدفع ثمن ذلك!'],
+ ck:['أوه! أخيراً بدأت تصبح ممتعاً!','هذا كل ما لديك؟!'],
+ sl:['لا أحب الانتظار، ابدأ!'],
+ rd:['هل يمكننا إشعال النار في هذه الرقعة؟','أشعر بالملل، أريد شيئاً مجنوناً!','أنا لست مجنونة، أنا فقط أملك أفكاراً رائعة!'],
+ op:'جامبيت الملك! لنبدأ الفوضى!',
+ w:['HAHAHA! دمرتُك!','هذه كانت حفلة وليست مباراة!'],
+ l:['مستحييييل! هذه الرقعة تغش!','لا! لا! أريد إعادة المباراة!','سأعود وأهزمك!']},
+
+{n:'The Wizard',i:'IMG_1755.jpeg',r:'1800',e:1800,c:['#9b5de5','#f9c74f'],m:'seven_rites_of_stone.mp3',
+ hi:['أهلاً! هل أنت مستعد لبعض السحر؟','لنرى أي الأسرار تخفيها هذه الرقعة!'],
+ tk:['هممم… لدي نظرية سحرية صغيرة…','الاحتمالات لا تنتهي أبداً!','انتظر! لقد خطرت لي فكرة!'],
+ pc:['تعويذة ناجحة!','أبراكادابرا! هل رأيت هذا السحر؟!'],
+ cc:['أوه… يبدو أن التعويذة انعكست!','حتى السحرة يخطئون أحياناً!'],
+ ck:['قوة العناصر الأربعة!','لم تكن تتوقع ذلك!'],
+ sl:['هممم… أحتاج إلى تعويذة تفكير!'],
+ rd:['هل تعرف الفرق بين سحر النار وسحر البرق؟','هل تعتقد أن للفيل طاقة سحرية؟','لدي كتاب قديم مليء بالتعاويذ الغريبة!'],
+ op:'الافتتاحية الإسبانية! فيها أسرار كثيرة...',
+ w:['هااا! قوة السحر لا تُقاوم!','سأكتب هذه الحركة في كتابي السحري!'],
+ l:['ماذا؟! هل أفسد أحدهم تعويذتي؟!','لا بأس، سأتعلم تعويذة أقوى!']},
+
+{n:'Jimmy',i:'IMG_1750.jpeg',r:'1600',e:1600,c:['#f8961e','#277da1'],
+ hi:['هل تتابع كرة السلة؟','يلا نلعب!'],
+ tk:['هل جربت تلعب وأنت تسمع موسيقى؟','عندي لعبة لازم تجربها!'],
+ pc:['هذا يستحق صورة للذكرى!'],
+ cc:['أوه، لا! قطعتي!'],
+ ck:['ياااه، الملك في خطر!'],
+ sl:['واجبات المدرسة لا تنتهي أبداً... وأنت لسه تفكر!'],
+ rd:['أفكر أشتري كاميرا جديدة.','واجبات المدرسة لا تنتهي أبداً.','هل تحب ألعاب العالم المفتوح؟','أتمنى يكون عندي وقت فراغ أكثر.'],
+ op:'الإيطالية افتتاحيتي المفضلة!',
+ w:['ييييس! فزت!','قلت لك إني بقدر أفوز!','مباراة جميلة، نعيدها؟'],
+ l:['أوه، خسرت! مباراة جميلة، نعيدها؟']},
+
+{n:'Pumpkin Kid',i:'IMG_1746.jpeg',r:'1200',e:1200,weak:1,c:['#ff8c00','#3b1f5c'],
+ hi:['مـ.. مرحباً... هل سنلعب الآن؟','أرجوك لا تكن قاسياً معي.'],
+ tk:['آآه! ماذا؟!','ه-هذه الحركة مخيفة قليلاً.','هل أنت متأكد أنك لن تأكل قطعي؟'],
+ pc:['أ-أعتقد أنني وجدت شيئاً!','أنا... أنا فخور بنفسي قليلاً!'],
+ cc:['أوه... لقد اختفت...','لا بأس... لا بأس... أنا بخير'],
+ ck:['أمييي! الملك في خطر!','أرجوك ابتعد عن ملكي!'],
+ sl:['ه-هل يمكننا إيقاف المباراة قليلاً؟'],
+ rd:['هل تحب اليقطين؟ أنا أحبه كثيراً!','أعتقد أن هناك شيئاً يتحرك خلفي...','هل تعتقد أن الأشباح تحب الشطرنج؟','أحياناً أشعر أن القطع تنظر إليّ...'],
+ op:'افتتاحية الفرسان الأربعة... هادئة ولطيفة.',
+ w:['هاه؟! فـ... فزت؟!','ياااي! لقد فعلتها!'],
+ l:['لا بأس... لقد حاولت...','هل يمكننا اللعب مرة أخرى؟']},
+
+{n:'Stupi',i:'IMG_1748.jpeg',r:'200',mode:'rand',c:['#ffee58','#f06292'],
+ hi:['هلااا! ماذا نلعب؟','هل هذه لعبة الشطرنج؟'],
+ tk:['هوب! اذهب إلى هناك!','لا أعرف لماذا اخترتك.','ههههه، حركة!'],
+ pc:['هههههه، بالصدفة!'],
+ cc:['أين ذهبت؟','هل كانت ملكي؟','أريد واحدة جديدة.'],
+ ck:['أوه! هل هذا مسموح؟'],
+ sl:['نسيت.','لماذا أنا هنا؟'],
+ rd:['هل السمك ينام وهو يسبح؟','أنا أحب الملاعق.','هل يمكنني أكل الرقعة؟','أريد أن أصبح ثلاجة عندما أكبر.','هل أنت موزة؟'],
+ op:'هجوم غروب! لا أعرف ما هو.',
+ w:['هااا! أنا فزت! كيف؟!','أعطوني كأساً! أريد أن آكله!'],
+ l:['ماذا؟ انتهت؟','أريد بطاطس.']},
+
+{n:"Mal'aqa",i:'IMG_1753.jpeg',r:'1000',e:1000,weak:1,c:['#c0c0c0','#5c6b7a'],
+ hi:['مرحباً أيها الإنسان، هل تحب الملاعق؟','لنلعب! لدي موعد مع طبق شوربة لاحقاً.'],
+ tk:['لا تثق بالثلاجة، إنها تعرف الكثير.','انتظر... لماذا نحن هنا؟','هل الشطرنج مصنوع من البطاطس؟'],
+ pc:['قطعة مسكينة، أتمنى لها حياة سعيدة.'],
+ cc:['لقد اختفت! هل أبحث عنها تحت الطاولة؟'],
+ ck:['كش؟ هل هذا نوع من الطعام؟'],
+ sl:['أنا أتذكر شيئاً لم يحدث بعد.'],
+ rd:['استوبي... نحن الاثنان لا نفهم الحياة.','ساحر فاشل. طلبت منه أن يحولني إلى شوكة ورفض.','جيمي يلعب كرة السلة. هل يمكنه رمي ملعقة في السلة؟','أنا أراقبك منذ ولادتي.','هل سبق لك أن رأيت ملعقة حزينة؟'],
+ op:'افتتاحية فان كرويس... أو ربما فان ملعقة.',
+ w:['أنا انتصرت! لا أعرف كيف، لكنني انتصرت!','المجد للملاعق!'],
+ l:['كش مات؟ هل هذا نوع من الطعام؟','انتهت المباراة؟ كنت أعدّ الملاعق!']},
+
+{n:'Professor Kleem',i:'IMG_1751.jpeg',r:'3100',e:3100,c:['#e0e0e0','#2d2d44'],m:'midnight_gambit.mp3',
+ hi:['لنبدأ.','أنا مستعدة.'],
+ tk:['خطأ.','كان بإمكانك اختيار أفضل.','هذه النقلة ستكلفك.'],
+ pc:['كما توقعت.','النتيجة واضحة.'],
+ cc:['لا بأس.','هذا ضمن الحسابات.'],
+ ck:['حسنًا.'],
+ sl:['خذ وقتك.','القرار ليس سهلًا.'],
+ op:'جامبيت الوزير.',
+ w:['كانت مباراة جيدة.','انتهت المباراة.'],
+ l:['تحليل مثير للاهتمام.','سأراجع هذه المباراة.']}
 ];
 
+/* sounds + music */
 let ac;
 function snd(k){if(!st.sfx)return;ac=ac||new(window.AudioContext||window.webkitAudioContext)();
  const q={mv:[[330,.05]],cap:[[200,.08],[140,.1]],chk:[[880,.08],[1100,.12]],end:[[523,.12],[659,.12],[784,.12],[1047,.25]]}[k];
  let t0=ac.currentTime;
  q.forEach(([f,d])=>{const o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=f;g.gain.setValueAtTime(.08,t0);g.gain.exponentialRampToValueAtTime(.001,t0+d);o.connect(g);g.connect(ac.destination);o.start(t0);o.stop(t0+d);t0+=d})}
-const mu=new Audio('glass_horizons.mp3');mu.loop=true;mu.volume=.5;
-mu.addEventListener('loadedmetadata',()=>{mu.currentTime=+localStorage.getItem('cc_t')||0});
-setInterval(()=>{if(!mu.paused)localStorage.setItem('cc_t',mu.currentTime)},1000);
+const mu=new Audio('glass_horizons.mp3');mu.loop=true;mu.volume=.3;
+mu.addEventListener('loadedmetadata',()=>{if(mu.src.includes('glass_horizons'))mu.currentTime=+localStorage.getItem('cc_t')||0});
+setInterval(()=>{if(!mu.paused&&mu.src.includes('glass_horizons'))localStorage.setItem('cc_t',mu.currentTime)},1000);
 document.addEventListener('pointerdown',()=>{if(st.music)mu.play().catch(()=>{})},{once:true});
 
+/* pixel pieces */
+const SP={
+p:['........','...##...','..####..','...##...','..####..','...##...','.######.','.######.'],
+r:['.#.##.#.','.######.','..####..','..####..','..####..','..####..','.######.','.######.'],
+n:['..###...','.#####..','##.####.','#..####.','...####.','..#####.','.######.','.######.'],
+b:['...##...','..####..','..#.##..','..####..','...##...','..####..','.######.','.######.'],
+q:['#.#..#.#','########','.######.','..####..','..####..','..####..','.######.','.######.'],
+k:['...##...','.######.','...##...','..####..','..####..','..####..','.######.','.######.']};
+function pix(type,col){
+ const m=col=='w'?'#fff':'#111',o=col=='w'?'#000':'#fff';let a='',b='';
+ SP[type].forEach((r,y)=>[...r].forEach((c,x)=>{if(c=='#'){
+  [[-1,0],[1,0],[0,-1],[0,1]].forEach(d=>a+='<rect x="'+(x+1+d[0])+'" y="'+(y+1+d[1])+'" width="1" height="1"/>');
+  b+='<rect x="'+(x+1)+'" y="'+(y+1)+'" width="1" height="1"/>'}}));
+ return '<svg viewBox="0 0 10 10" style="width:84%;height:84%" shape-rendering="crispEdges"><g fill="'+o+'">'+a+'</g><g fill="'+m+'">'+b+'</g></svg>'}
+const GL={p:'♟',n:'♞',b:'♝',r:'♜',q:'♛',k:'♚'};
+const pcHtml=(ty,co)=>st.px?pix(ty,co):GL[ty]+'\uFE0E';
+
+/* engines: eng plays for the cat, ev only evaluates */
 let eng=null,ev=null,engOK=false,pending=null;
 let evBusy=false,evQ=false,evFen='',ecp=null,emt=null;
 const mk=x=>new Worker(URL.createObjectURL(new Blob([x],{type:'text/javascript'})));
@@ -141,12 +281,13 @@ function showEval(){
  const c=s*ecp;
  bar(50+50*(2/(1+Math.exp(-c/400))-1),(c>=0?'+':'')+(c/100).toFixed(1))}
 
-let G,cat,over=false,sel=null,last=[],hd=0,busy=false,drag=null;
-const GL={p:'♟',n:'♞',b:'♝',r:'♜',q:'♛',k:'♚'};
+/* board */
+let G,cat,over=false,sel=null,last=[],hd=0,busy=false,drag=null,slowT=null;
 const FILES='abcdefgh';
 const pos=(e,s)=>{e.style.left=(s.charCodeAt(0)-97)*12.5+'%';e.style.top=(8-+s[1])*12.5+'%';e.dataset.s=s};
 const pcAt=s=>[...document.querySelectorAll('.pc')].find(e=>e.dataset.s==s&&!e.dataset.dead);
 const say=x=>{$('talk').textContent=x};
+const ev2=k=>{if(cat[k])say(R(L(cat[k])))};
 function paint(){const c=cat.h?cat.h[hd].c:cat.c;$('bd').style.setProperty('--c1',c[0]);$('bd').style.setProperty('--c2',c[1])}
 function build(){
  const b=$('bd');b.innerHTML='';
@@ -155,7 +296,7 @@ function build(){
   s.style.background=(x+y)%2?'var(--c2)':'var(--c1)';
   s.style.left=x*12.5+'%';s.style.top=y*12.5+'%';b.appendChild(s)}
  G.board().forEach((row,y)=>row.forEach((p,x)=>{if(!p)return;
-  const e=document.createElement('div');e.className='pc p'+p.color;e.textContent=GL[p.type]+'\uFE0E';
+  const e=document.createElement('div');e.className='pc p'+p.color;e.innerHTML=pcHtml(p.type,p.color);
   pos(e,FILES[x]+(8-y));b.appendChild(e)}))}
 function marks(){
  document.querySelectorAll('.sq').forEach(e=>e.classList.remove('last','sel','dot','cap'));
@@ -198,24 +339,33 @@ function apply(m){
   const k=m.flags.includes('k'),r=m.color=='w'?'1':'8',re=pcAt((k?'h':'a')+r);
   if(re)pos(re,(k?'f':'d')+r)}
  e.classList.remove('drag');pos(e,m.to);
- if(m.promotion)e.textContent=GL[m.promotion]+'\uFE0E';
+ if(m.promotion)e.innerHTML=pcHtml(m.promotion,m.color);
  last=[m.from,m.to];marks();
  snd(G.game_over()?'end':G.in_check()?'chk':m.captured?'cap':'mv');
  if(G.in_checkmate())bar(G.turn()=='b'?100:0,'#');else evalNow();
- if(!endCheck()&&m.color=='w'){taunt();busy=true;setTimeout(catMove,650)}}
+ if(endCheck())return;
+ if(m.color=='w'){
+  clearTimeout(slowT);
+  if(G.in_check()&&cat.ck)ev2('ck');
+  else if(m.captured&&cat.cc)ev2('cc');
+  else taunt();
+  busy=true;setTimeout(catMove,650)}
+ else{
+  if(m.captured&&cat.pc)ev2('pc');
+  slowT=setTimeout(()=>{if(!over)ev2('sl')},25000)}}
 function taunt(){
- if(G.history().length==1&&cat.op)say(cat.op[st.lang]);
- else if(cat.tk&&Math.random()<.55)say(R(cat.tk[st.lang]))}
+ if(G.history().length==1&&cat.op)say(typeof cat.op=='string'?cat.op:cat.op[st.lang]);
+ else if(cat.tk&&Math.random()<.55)say(R(L(cat.tk)))}
 function endCheck(){
  if(!G.game_over())return false;
- over=true;let k='draw';
- if(G.in_checkmate()){const pw=G.turn()=='b';say(R((pw?cat.l:cat.w)[st.lang]));k=pw?'won':'lost'}else say('...');
- $('status').innerHTML=t(k)+' &nbsp; <a href="review.html" style="color:#ff1493">'+(st.lang=='ar'?'راجع المباراة':'Review game')+'</a>';
+ over=true;clearTimeout(slowT);let k='draw';
+ if(G.in_checkmate()){const pw=G.turn()=='b';say(R(L(pw?cat.l:cat.w)));k=pw?'won':'lost'}else say('...');
+ $('status').textContent=t(k);$('rb').style.display='inline-block';
  localStorage.setItem('cc_game',JSON.stringify({pgn:G.pgn(),cat:cat.n}));
  return true}
 function catMove(){
  if(over)return;
- if(cat.h){hd=Math.floor(Math.random()*3);paint();say(R(cat.h[hd].tk[st.lang]))}
+ if(cat.h){hd=Math.floor(Math.random()*3);paint();say(R(L(cat.h[hd].tk)))}
  const ms=G.moves({verbose:true});
  const rnd=()=>{const c=ms.filter(m=>m.captured);return R(c.length&&Math.random()<.5?c:ms)};
  const fin=m=>{busy=false;if(over||!m)return;G.move(m);$('status').textContent=t('your');apply(m)};
@@ -226,27 +376,36 @@ function catMove(){
  eng.postMessage('setoption name Skill Level value '+Math.round(Math.max(0,Math.min(20,(elo-1300)/85))));
  eng.postMessage('position fen '+G.fen());
  eng.postMessage('go movetime '+Math.round(300+elo/6))}
+setInterval(()=>{if(cat&&G&&!over&&!busy&&cat.rd&&Math.random()<.5)ev2('rd')},30000);
 
+/* screens */
 function go(i){
  cat=CATS[i];startEng();
+ const f=cat.m||'cedar_and_morning_air.mp3';
+ if(!mu.src.endsWith(f)){mu.src=f;mu.currentTime=0}
+ if(st.music)mu.play().catch(()=>{});
  $('list').style.display='none';$('h').style.display='none';$('game').style.display='block';
  $('face').src=cat.i;newGame()}
 function newGame(){
- G=new Chess();over=false;sel=null;last=[];busy=false;hd=0;
- build();paint();bar(50,'0.0');say(R(cat.hi[st.lang]));$('status').textContent=t('your')}
+ G=new Chess();over=false;sel=null;last=[];busy=false;hd=0;clearTimeout(slowT);
+ $('rb').style.display='none';
+ build();paint();bar(50,'0.0');say(R(L(cat.hi)));$('status').textContent=t('your')}
 function ui(){
  document.documentElement.dir=st.lang=='ar'?'rtl':'ltr';
  $('h').textContent=t('pick');$('bk').textContent='← '+t('back');$('sb').textContent='⚙ '+t('set');
- $('nb').textContent=t('new');$('cb').textContent=t('chg');$('mt').textContent=t('set');$('bx').textContent=t('close');
+ $('nb').textContent=t('new');$('cb').textContent=t('chg');$('rb').textContent=t('rev');
+ $('mt').textContent=t('set');$('bx').textContent=t('close');
  $('bl').textContent=t('lang')+': '+(st.lang=='en'?'English':'العربية');
  $('bm').textContent=t('mus')+': '+t(st.music?'on':'off');
  $('bs').textContent=t('sfx')+': '+t(st.sfx?'on':'off');
- $('list').innerHTML=CATS.map((c,i)=>'<div class="cat" onclick="go('+i+')"><img src="'+c.i+'"><b>'+c.n+'</b><br><small>'+c.r[st.lang]+'</small></div>').join('')}
+ $('bp').textContent=t('px')+': '+t(st.px?'pix':'nor');
+ $('list').innerHTML=CATS.map((c,i)=>'<div class="cat" onclick="go('+i+')"><img src="'+c.i+'"><b>'+c.n+'</b><br><small>'+(typeof c.r=='string'?c.r:c.r[st.lang])+'</small></div>').join('')}
 $('sb').onclick=()=>$('modal').style.display='flex';
 $('bx').onclick=()=>$('modal').style.display='none';
 $('bl').onclick=()=>{st.lang=st.lang=='en'?'ar':'en';save();ui()};
 $('bm').onclick=()=>{st.music=!st.music;save();st.music?mu.play().catch(()=>{}):mu.pause();ui()};
 $('bs').onclick=()=>{st.sfx=!st.sfx;save();ui()};
+$('bp').onclick=()=>{st.px=!st.px;save();ui();if(G&&cat){build();marks()}};
 $('nb').onclick=newGame;
 $('cb').onclick=()=>{$('game').style.display='none';$('list').style.display='grid';$('h').style.display='block'};
 ui();
