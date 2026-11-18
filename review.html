@@ -56,11 +56,11 @@ button,.bt{font-family:inherit;color:#fff;background:rgba(10,0,25,.9);border:3px
     <div class="p coach" style="grid-area:coach"><img src="098D8C9B-5E24-4766-AD2F-8CF1E878A199.png" alt=""><div id="say"></div></div>
     <div style="grid-area:board"><div id="bd"></div><div id="evn"></div></div>
     <div class="p row" style="grid-area:nav">
-      <button onclick="show(0)">⏮</button>
+      <button onclick="show(0)">◀◀</button>
       <button onclick="show(cur-1)">◀</button>
       <button id="pl" onclick="auto()">▶</button>
       <button onclick="show(cur+1)">▷</button>
-      <button onclick="show(hist.length)">⏭</button>
+      <button onclick="show(hist.length)">▶▶</button>
     </div>
     <div class="p" style="grid-area:stats" id="stats"></div>
     <div class="p" style="grid-area:moves"><h3 id="mh"></h3><div id="mv"></div></div>
@@ -97,6 +97,12 @@ function blip(){
  o.type='square';o.frequency.value=420+Math.random()*180;
  g.gain.setValueAtTime(.04,t0);g.gain.exponentialRampToValueAtTime(.001,t0+.05);
  o.connect(g);g.connect(ac.destination);o.start(t0);o.stop(t0+.05)}
+function snd(k){
+ if(!st.sfx)return;
+ ac=ac||new(window.AudioContext||window.webkitAudioContext)();
+ const q={mv:[[330,.05]],cap:[[200,.08],[140,.1]],chk:[[880,.08],[1100,.12]],end:[[523,.12],[659,.12],[784,.12],[1047,.25]]}[k];
+ let t0=ac.currentTime;
+ q.forEach(([f,d])=>{const o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=f;g.gain.setValueAtTime(.08,t0);g.gain.exponentialRampToValueAtTime(.001,t0+d);o.connect(g);g.connect(ac.destination);o.start(t0);o.stop(t0+d);t0+=d})}
 let tw=null;
 function type(s){
  clearInterval(tw);const el=$('say');el.textContent='';
@@ -194,7 +200,7 @@ else{
   ACC=Math.round((cnt.gb+cnt.br+cnt.ex+cnt.gd)/n*100);
   BEST=Math.max(ACC,+localStorage.getItem('cc_best')||0);localStorage.setItem('cc_best',BEST);
   $('pg').style.display='none';$('main').style.display='grid';
-  rebuild();show(0)}
+  rebuild();show(0,true)}
 
  function rebuild(){
   $('stats').innerHTML='<h3>'+t('stats')+'</h3><div style="font-size:2.2rem">'+ACC+'%</div><small>'+t('acc')+'</small><hr><div class="row">'+K.map(k=>'<span class="row" title="'+k[st.lang=='ar'?3:2]+'">'+face(k[0],'30px')+'<b>'+cnt[k[0]]+'</b></span>').join('')+'</div><hr><small>'+t('best')+'</small><div style="font-size:1.4rem">'+BEST+'%</div>';
@@ -209,9 +215,10 @@ else{
   if(m.color=='b')return D.cat+(st.lang=='ar'?' لعب ':' played ')+m.san+'.';
   return M[cls[j-1]][st.lang=='ar'?1:0].replace('{m}',m.san).replace('{b}',bestSan(j-1)).replace('{l}',(loss[j-1]/100).toFixed(1))}
 
- function show(j){
+ function show(j,quiet){
   j=Math.max(0,Math.min(hist.length,j));cur=j;
   const g2=new Chess(fens[j]),cc=CC[D.cat]||['#eee','#777'],lm=j?hist[j-1]:null;
+  if(!quiet&&lm)snd(j==hist.length&&g2.game_over()?'end':g2.in_check()?'chk':lm.captured?'cap':'mv');
   let h='';
   for(let y=0;y<8;y++)for(let x=0;x<8;x++){
    const n='abcdefgh'[x]+(8-y);
@@ -233,13 +240,13 @@ else{
 
  function auto(){
   if(timer){clearInterval(timer);timer=null;$('pl').textContent='▶';return}
-  $('pl').textContent='⏸';
+  $('pl').textContent='❚❚';
   timer=setInterval(()=>{if(cur>=hist.length){auto();return}show(cur+1)},2200)}
  document.addEventListener('keydown',e=>{if(e.key=='ArrowRight')show(cur+1);if(e.key=='ArrowLeft')show(cur-1)});
 
  window.show=show;window.auto=auto;window.hist=hist;
  Object.defineProperty(window,'cur',{get:()=>cur});
- window.again=()=>{rebuild();show(cur)};
+ window.again=()=>{rebuild();show(cur,true)};
 
  let i=0,cp=0,mt=null,w;
  function run(){
