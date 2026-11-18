@@ -11,18 +11,30 @@ body{margin:0;min-height:100vh;font-family:'Courier New',monospace;color:#fff;te
 body::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.75)}
 .w{position:relative;max-width:520px;margin:auto;padding:14px 10px}
 a{color:#fff}
-h1{text-shadow:3px 3px 0 #ff1493;letter-spacing:2px}
-.box{background:rgba(0,0,0,.7);border:3px solid #fff;box-shadow:4px 4px 0 #ff1493;padding:12px;margin:12px 0}
-.row{display:flex;align-items:center;gap:10px;padding:6px 0;text-align:start}
-.row span.n{flex:1}
-.b{display:inline-flex;flex:none;width:30px;height:30px;border-radius:50%;align-items:center;justify-content:center;font-weight:bold;color:#000;background:var(--c);box-shadow:0 0 8px var(--c)}
+h1{text-shadow:3px 3px 0 #ff1493;letter-spacing:2px;margin:6px 0}
+button{font-family:inherit;color:#fff;background:#000;border:3px solid #fff;cursor:pointer;padding:8px 14px;font-size:1.1rem;margin:4px}
+.box{background:rgba(0,0,0,.7);border:3px solid #fff;box-shadow:4px 4px 0 #ff1493;padding:10px;margin:10px 0}
+.coach{display:flex;gap:10px;align-items:center;text-align:start}
+.coach img{width:84px;height:84px;object-fit:contain;background:#fff;border:3px solid #000;border-radius:10px;flex:none}
+#say{flex:1;background:#fff;color:#000;border:3px solid #000;border-radius:10px;padding:8px;min-height:64px}
+#bd{direction:ltr;position:relative;width:min(96vw,480px);aspect-ratio:1;margin:8px auto;border:4px solid #fff}
+.sq{position:absolute;width:12.5%;height:12.5%}
+.sq.l{box-shadow:inset 0 0 0 100px rgba(255,235,59,.5)}
+.pc{position:absolute;width:12.5%;height:12.5%;display:flex;align-items:center;justify-content:center;font-size:min(11vw,58px);line-height:1}
+.pw{color:#fff;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
+.pb{color:#000;text-shadow:0 0 2px #fff,0 0 2px #fff}
+#ar{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:4}
+.bdg{position:absolute;width:7.5%;height:7.5%;z-index:5}
 .gb{animation:gl .5s steps(2) infinite}
 @keyframes gl{
-0%{transform:translate(0);box-shadow:0 0 8px #f0f}
-25%{transform:translate(-2px,1px);box-shadow:3px 0 #0ff,-3px 0 #f0f}
-50%{transform:translate(2px,-1px);box-shadow:-3px 0 #0ff,3px 0 #f0f}
-75%{transform:translate(-1px,-2px);box-shadow:3px 0 #f0f,-3px 0 #0ff}
-100%{transform:translate(0)}}
+0%{transform:translate(0);filter:none}
+25%{transform:translate(-2px,1px);filter:drop-shadow(3px 0 #0ff) drop-shadow(-3px 0 #f0f)}
+50%{transform:translate(2px,-1px);filter:drop-shadow(-3px 0 #0ff) drop-shadow(3px 0 #f0f)}
+75%{transform:translate(-1px,-2px);filter:drop-shadow(3px 0 #f0f) drop-shadow(-3px 0 #0ff)}
+100%{transform:translate(0);filter:none}}
+.row{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+.mv{cursor:pointer;display:inline-flex;align-items:center;gap:2px;margin:3px;padding:2px 4px}
+.mv.on{background:#ff1493}
 </style>
 </head>
 <body>
@@ -30,8 +42,19 @@ h1{text-shadow:3px 3px 0 #ff1493;letter-spacing:2px}
   <a id="bk" href="cats.html"></a>
   <h1 id="h"></h1>
   <div id="pg"></div>
-  <div id="sum" class="box" style="display:none"></div>
-  <div id="mv" class="box" style="display:none"></div>
+  <div id="main" style="display:none">
+    <div class="box coach"><img src="098D8C9B-5E24-4766-AD2F-8CF1E878A199.png" alt=""><div id="say"></div></div>
+    <div id="bd"></div>
+    <div id="evn"></div>
+    <div>
+      <button onclick="show(0)">⏮</button>
+      <button onclick="show(cur-1)">◀</button>
+      <button onclick="show(cur+1)">▶</button>
+      <button onclick="show(hist.length)">⏭</button>
+    </div>
+    <div class="box row" id="sum"></div>
+    <div class="box" id="mv"></div>
+  </div>
 </div>
 
 <script>
@@ -39,27 +62,45 @@ const $=id=>document.getElementById(id);
 const st=JSON.parse(localStorage.getItem('cc')||'{}'),ar=st.lang=='ar';
 const D=JSON.parse(localStorage.getItem('cc_game')||'null');
 document.documentElement.dir=ar?'rtl':'ltr';
-$('bk').textContent=(ar?'→ رجوع':'← Back');
+$('bk').textContent=ar?'→ رجوع':'← Back';
 $('h').textContent=ar?'مراجعة المباراة':'GAME REVIEW';
 
 const K=[
-['gb','✦','#ff00ff','Glitch Brilliant','جليتش بريليانت'],
-['br','✦','#22d3ee','Brilliant','بريليانت'],
-['ex','♥','#4ade80','Excellent','ممتازة'],
-['gd','✓','#ffffff','Good','جيدة'],
-['in','?','#facc15','Inaccuracy','غير دقيقة'],
-['mi','!','#fb923c','Mistake','خطأ'],
-['bl','☠','#ef4444','Blunder','بلاندر']];
+['gb','','#ff00ff','Glitch Brilliant','جليتش بريليانت'],
+['br','','#22d3ee','Brilliant','بريليانت'],
+['ex','','#4ade80','Excellent','ممتازة'],
+['gd','','#ffffff','Good','جيدة'],
+['in','','#facc15','Inaccuracy','غير دقيقة'],
+['mi','','#fb923c','Mistake','خطأ'],
+['bl','','#ef4444','Blunder','بلاندر']];
 const KM={};K.forEach(k=>KM[k[0]]=k);
-const badge=k=>'<span class="b '+(k=='gb'?'gb':'')+'" style="--c:'+KM[k][2]+'">'+KM[k][1]+'</span>';
+const E={
+gb:['★','M13 29Q20 38 27 29Z',1],br:['★','M13 29Q20 38 27 29Z',1],
+ex:['^','M14 29Q20 35 26 29',0],gd:['•','M15 30Q20 33 25 30',0],
+in:['•','M15 31H25',0],mi:['°','M14 33Q20 28 26 33',0],bl:['×','M15 31Q20 39 25 31Z',1]};
+function face(k,s){
+ const c=KM[k][2],e=E[k];
+ return '<svg viewBox="0 0 40 40" class="'+(k=='gb'?'gb':'')+'" style="width:'+s+';height:'+s+'"><path d="M5 17L8 2L19 9ZM35 17L32 2L21 9Z" fill="'+c+'"/><circle cx="20" cy="22" r="15" fill="'+c+'"/><g fill="#000" font-size="11" font-weight="bold" text-anchor="middle" font-family="Arial"><text x="13" y="25">'+e[0]+'</text><text x="27" y="25">'+e[0]+'</text></g><path d="'+e[1]+'" stroke="#000" stroke-width="2" stroke-linecap="round" fill="'+(e[2]?'#000':'none')+'"/></svg>'}
+
+const M={
+gb:['FIVE brilliant moves in a row?! Reality is glitching! {m}!','خمس نقلات بريليانت ورا بعض؟! الواقع يتشوش! {m}!'],
+br:['Brilliant! {m} is a sacrifice the engine loves. Wow!','بريليانت! {m} تضحية يحبها المحرك. واو!'],
+ex:['Excellent! {m} is one of the best moves here.','ممتازة! {m} من أفضل النقلات هنا.'],
+gd:['Good move. {m} keeps things solid.','نقلة جيدة. {m} تبقي الوضع متماسكاً.'],
+in:['{m} is a bit inaccurate. {b} was better.','{m} غير دقيقة قليلاً. كانت {b} أفضل.'],
+mi:['{m} is a mistake, it cost about {l} pawns. Try {b} next time.','{m} خطأ، كلفتك حوالي {l} بيدق. جرّب {b} المرة الجاية.'],
+bl:['Blunder! {m} threw away about {l} pawns. {b} was the move!','بلاندر! {m} ضيّعت حوالي {l} بيدق. كانت {b} هي النقلة!']};
+
+const CC={'Cat 67':['#39ff14','#7a1fa2'],'BOBBY':['#e63946','#2f6bff'],'The Obsessed Cat':['#d4af37','#1a1a1a'],'The Musical Cat':['#cfe3f2','#6b7a8f'],'The Ghost Cat':['#ffffff','#9db4e0']};
 const V={p:1,n:3,b:3,r:5,q:9,k:0};
+const GL={p:'♟',n:'♞',b:'♝',r:'♜',q:'♛',k:'♚'};
+let hist=[],fens=[],E2=[],B=[],cls=[],loss=[],cur=0;
 
 if(!D){$('pg').textContent=ar?'ما في مباراة محفوظة. العب مباراة أول.':'No saved game. Play a game first.'}
 else{
- const g=new Chess();
- g.load_pgn(D.pgn);
- const hist=g.history({verbose:true});
- const r=new Chess(),fens=[r.fen()];
+ const g=new Chess();g.load_pgn(D.pgn);
+ hist=g.history({verbose:true});
+ const r=new Chess();fens=[r.fen()];
  hist.forEach(m=>{r.move(m.san);fens.push(r.fen())});
 
  function isSac(fen,san){
@@ -67,31 +108,65 @@ else{
   if(!m||V[m.piece]<3)return false;
   if(m.captured&&V[m.captured]>=V[m.piece])return false;
   return x.moves({verbose:true}).some(y=>y.to==m.to&&y.captured)}
+ function bestSan(i){
+  const u=B[i];if(!u)return '...';
+  const x=new Chess(fens[i]),m=x.move({from:u.slice(0,2),to:u.slice(2,4),promotion:u[4]||'q'});
+  return m?m.san:'...'}
 
- function done(E,B){
-  let streak=0;const cnt={};K.forEach(k=>cnt[k[0]]=0);let rows='';
+ function done(){
+  let streak=0;const cnt={};K.forEach(k=>cnt[k[0]]=0);
   hist.forEach((m,j)=>{
    if(j%2)return;
-   const loss=Math.max(0,E[j]-E[j+1]);
-   let k;
-   if(loss<=20&&E[j+1]>=-150&&E[j]<600&&isSac(fens[j],m.san))k='br';
-   else k=loss<=20?'ex':loss<=60?'gd':loss<=130?'in':loss<=300?'mi':'bl';
+   const l=Math.max(0,E2[j]-E2[j+1]);loss[j]=l;let k;
+   if(l<=20&&E2[j+1]>=-150&&E2[j]<600&&isSac(fens[j],m.san))k='br';
+   else k=l<=20?'ex':l<=60?'gd':l<=130?'in':l<=300?'mi':'bl';
    if(k=='br'){streak++;if(streak==5){k='gb';streak=0}}else streak=0;
-   cnt[k]++;
-   rows+='<div class="row">'+badge(k)+'<span class="n">'+(Math.floor(j/2)+1)+'. '+m.san+'</span><span>'+KM[k][ar?4:3]+'</span></div>'});
-  $('pg').style.display='none';
-  $('sum').style.display='block';$('mv').style.display='block';
-  $('sum').innerHTML=K.map(k=>'<div class="row">'+badge(k[0])+'<span class="n">'+k[ar?4:3]+'</span><b>'+cnt[k[0]]+'</b></div>').join('');
-  $('mv').innerHTML=rows}
+   cls[j]=k;cnt[k]++});
+  $('pg').style.display='none';$('main').style.display='block';
+  $('sum').innerHTML=K.map(k=>'<span class="row">'+face(k[0],'30px')+'<b>'+cnt[k[0]]+'</b></span>').join('&nbsp;');
+  $('mv').innerHTML=hist.map((m,j)=>'<span class="mv" id="m'+j+'" onclick="show('+(j+1)+')">'+(j%2?'':(Math.floor(j/2)+1)+'. ')+m.san+(j%2?'':face(cls[j],'18px'))+'</span>').join('');
+  show(0)}
 
- const E=[],B=[];let i=0,cp=0,mt=null,w;
+ function show(j){
+  j=Math.max(0,Math.min(hist.length,j));cur=j;
+  const g2=new Chess(fens[j]),cc=CC[D.cat]||['#eee','#777'],lm=j?hist[j-1]:null;
+  let h='';
+  for(let y=0;y<8;y++)for(let x=0;x<8;x++){
+   const n='abcdefgh'[x]+(8-y);
+   h+='<div class="sq'+(lm&&(n==lm.from||n==lm.to)?' l':'')+'" style="left:'+x*12.5+'%;top:'+y*12.5+'%;background:'+((x+y)%2?cc[1]:cc[0])+'"></div>';
+   const p=g2.get(n);
+   if(p)h+='<div class="pc p'+p.color+'" style="left:'+x*12.5+'%;top:'+y*12.5+'%">'+GL[p.type]+'\uFE0E</div>'}
+  let arrow='',k=lm&&lm.color=='w'?cls[j-1]:null;
+  if(k&&['in','mi','bl'].includes(k)&&B[j-1]){
+   const u=B[j-1],c=s=>[(s.charCodeAt(0)-96.5),(8.5-s[1])];
+   const a=c(u.slice(0,2)),b=c(u.slice(2,4));
+   arrow='<svg id="ar" viewBox="0 0 8 8"><line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'" stroke="#22d3ee" stroke-width=".2" stroke-linecap="round" opacity=".85"/><circle cx="'+b[0]+'" cy="'+b[1]+'" r=".28" fill="#22d3ee" opacity=".85"/></svg>'}
+  let bdg='';
+  if(k){const x=lm.to.charCodeAt(0)-97,y=8-+lm.to[1];
+   bdg='<div class="bdg" style="left:'+((x+1)*12.5-7.5)+'%;top:'+(y*12.5)+'%">'+face(k,'100%')+'</div>'}
+  $('bd').innerHTML=h+arrow+bdg;
+  $('say').textContent=txt(j);
+  document.querySelectorAll('.mv').forEach(e=>e.classList.remove('on'));
+  if(j)$('m'+(j-1)).classList.add('on');
+  const e=E2[j]/100;$('evn').textContent=(e>=0?'+':'')+e.toFixed(1)}
+
+ function txt(j){
+  if(!j)return ar?'مرحباً! أنا المعلمة. اضغط ▶ ونراجع مباراتك نقلة نقلة.':'Hi! I am the Teacher. Press ▶ and we will review your game move by move.';
+  const m=hist[j-1];
+  if(m.color=='b')return D.cat+(ar?' لعب ':' played ')+m.san+'.';
+  return M[cls[j-1]][ar?1:0].replace('{m}',m.san).replace('{b}',bestSan(j-1)).replace('{l}',(loss[j-1]/100).toFixed(1))}
+
+ window.show=show;window.hist=hist;
+ Object.defineProperty(window,'cur',{get:()=>cur});
+
+ let i=0,cp=0,mt=null,w;
  function run(){
   $('pg').textContent=(ar?'جاري التحليل ':'Analyzing ')+i+'/'+fens.length;
   cp=0;mt=null;
   const z=new Chess(fens[i]);
   if(z.game_over()){
-   E[i]=z.in_checkmate()?(z.turn()=='w'?-1000:1000):0;B[i]='';i++;
-   if(i<fens.length)run();else done(E,B);
+   E2[i]=z.in_checkmate()?(z.turn()=='w'?-1000:1000):0;B[i]='';i++;
+   if(i<fens.length)run();else done();
    return}
   w.postMessage('position fen '+fens[i]);
   w.postMessage('go movetime 180')}
@@ -103,9 +178,9 @@ else{
    if(l.startsWith('bestmove')){
     const s=fens[i].split(' ')[1]=='w'?1:-1;
     const v=mt!==null?(mt>0?1000:-1000):cp;
-    E[i]=Math.max(-1000,Math.min(1000,s*v));B[i]=l.split(' ')[1];
+    E2[i]=Math.max(-1000,Math.min(1000,s*v));B[i]=l.split(' ')[1];
     i++;
-    if(i<fens.length)run();else done(E,B)}};
+    if(i<fens.length)run();else done()}};
   w.postMessage('uci');run()
  }).catch(()=>{$('pg').textContent=ar?'تعذر تحميل المحرك.':'Could not load the engine.'})
 }
