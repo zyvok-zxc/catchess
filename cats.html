@@ -113,7 +113,6 @@ mu.addEventListener('loadedmetadata',()=>{mu.currentTime=+localStorage.getItem('
 setInterval(()=>{if(!mu.paused)localStorage.setItem('cc_t',mu.currentTime)},1000);
 document.addEventListener('pointerdown',()=>{if(st.music)mu.play().catch(()=>{})},{once:true});
 
-/* engines: eng plays for the cat, ev only evaluates */
 let eng=null,ev=null,engOK=false,pending=null;
 let evBusy=false,evQ=false,evFen='',ecp=null,emt=null;
 const mk=x=>new Worker(URL.createObjectURL(new Blob([x],{type:'text/javascript'})));
@@ -142,7 +141,6 @@ function showEval(){
  const c=s*ecp;
  bar(50+50*(2/(1+Math.exp(-c/400))-1),(c>=0?'+':'')+(c/100).toFixed(1))}
 
-/* board */
 let G,cat,over=false,sel=null,last=[],hd=0,busy=false,drag=null;
 const GL={p:'♟',n:'♞',b:'♝',r:'♜',q:'♛',k:'♚'};
 const FILES='abcdefgh';
@@ -212,7 +210,7 @@ function endCheck(){
  if(!G.game_over())return false;
  over=true;let k='draw';
  if(G.in_checkmate()){const pw=G.turn()=='b';say(R((pw?cat.l:cat.w)[st.lang]));k=pw?'won':'lost'}else say('...');
- $('status').textContent=t(k);
+ $('status').innerHTML=t(k)+' &nbsp; <a href="review.html" style="color:#ff1493">'+(st.lang=='ar'?'راجع المباراة':'Review game')+'</a>';
  localStorage.setItem('cc_game',JSON.stringify({pgn:G.pgn(),cat:cat.n}));
  return true}
 function catMove(){
