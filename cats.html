@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cat Chess</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script src="chars2.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;min-height:100vh;font-family:'Courier New',monospace;color:#fff;text-align:center;background:#000 url(IMG_1692.jpeg) left/cover fixed}
@@ -73,7 +74,6 @@ ar:{pick:'اختر شخصيتك',back:'رجوع',new:'لعبة جديدة',chg:'
 const t=k=>T[st.lang][k];
 const L=x=>Array.isArray(x)?x:(x[st.lang]||x.ar||x.en);
 
-/* characters: hi=start, tk=after your move, pc=you lose a piece, cc=it loses a piece, ck=it is in check, sl=you think long, rd=random chat, w=it wins, l=it loses */
 const CATS=[
 {n:'Cat 67',i:'IMG_1703.png',r:{en:'900',ar:'900'},mode:'rand',c:['#39ff14','#7a1fa2'],
  hi:{en:['Hello 67! How are you 67? I hope we play 67!'],ar:['مرحبا 67 كيف الحال 67 أتمنى نلعب 67']},
@@ -223,19 +223,25 @@ const CATS=[
  w:['كانت مباراة جيدة.','انتهت المباراة.'],
  l:['تحليل مثير للاهتمام.','سأراجع هذه المباراة.']}
 ];
+CATS.push(...(window.MORE||[]));
 
-/* sounds + music */
 let ac;
 function snd(k){if(!st.sfx)return;ac=ac||new(window.AudioContext||window.webkitAudioContext)();
  const q={mv:[[330,.05]],cap:[[200,.08],[140,.1]],chk:[[880,.08],[1100,.12]],end:[[523,.12],[659,.12],[784,.12],[1047,.25]]}[k];
  let t0=ac.currentTime;
  q.forEach(([f,d])=>{const o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=f;g.gain.setValueAtTime(.08,t0);g.gain.exponentialRampToValueAtTime(.001,t0+d);o.connect(g);g.connect(ac.destination);o.start(t0);o.stop(t0+d);t0+=d})}
+function blip(p){
+ if(!st.sfx)return;
+ ac=ac||new(window.AudioContext||window.webkitAudioContext)();
+ const o=ac.createOscillator(),g=ac.createGain(),t0=ac.currentTime;
+ o.type='square';o.frequency.value=(420+Math.random()*160)*p;
+ g.gain.setValueAtTime(.04,t0);g.gain.exponentialRampToValueAtTime(.001,t0+.05);
+ o.connect(g);g.connect(ac.destination);o.start(t0);o.stop(t0+.05)}
 const mu=new Audio('glass_horizons.mp3');mu.loop=true;mu.volume=.3;
 mu.addEventListener('loadedmetadata',()=>{if(mu.src.includes('glass_horizons'))mu.currentTime=+localStorage.getItem('cc_t')||0});
 setInterval(()=>{if(!mu.paused&&mu.src.includes('glass_horizons'))localStorage.setItem('cc_t',mu.currentTime)},1000);
 document.addEventListener('pointerdown',()=>{if(st.music)mu.play().catch(()=>{})},{once:true});
 
-/* pixel pieces */
 const SP={
 p:['........','...##...','..####..','...##...','..####..','...##...','.######.','.######.'],
 r:['.#.##.#.','.######.','..####..','..####..','..####..','..####..','.######.','.######.'],
@@ -252,7 +258,6 @@ function pix(type,col){
 const GL={p:'♟',n:'♞',b:'♝',r:'♜',q:'♛',k:'♚'};
 const pcHtml=(ty,co)=>st.px?pix(ty,co):GL[ty]+'\uFE0E';
 
-/* engines: eng plays for the cat, ev only evaluates */
 let eng=null,ev=null,engOK=false,pending=null;
 let evBusy=false,evQ=false,evFen='',ecp=null,emt=null;
 const mk=x=>new Worker(URL.createObjectURL(new Blob([x],{type:'text/javascript'})));
@@ -281,12 +286,19 @@ function showEval(){
  const c=s*ecp;
  bar(50+50*(2/(1+Math.exp(-c/400))-1),(c>=0?'+':'')+(c/100).toFixed(1))}
 
-/* board */
-let G,cat,over=false,sel=null,last=[],hd=0,busy=false,drag=null,slowT=null;
+let G,cat,over=false,sel=null,last=[],hd=0,busy=false,drag=null,slowT=null,tw=null;
 const FILES='abcdefgh';
 const pos=(e,s)=>{e.style.left=(s.charCodeAt(0)-97)*12.5+'%';e.style.top=(8-+s[1])*12.5+'%';e.dataset.s=s};
 const pcAt=s=>[...document.querySelectorAll('.pc')].find(e=>e.dataset.s==s&&!e.dataset.dead);
-const say=x=>{$('talk').textContent=x};
+function say(s){
+ clearInterval(tw);const el=$('talk');el.textContent='';
+ let i=0,w=0;const p=(cat&&cat.pt)||1;
+ tw=setInterval(()=>{
+  if(w>0){w--;return}
+  if(i>=s.length){clearInterval(tw);return}
+  const c=s[i++];el.textContent=s.slice(0,i);
+  if(c!=' ')blip(p);
+  if('.!?؟،,'.includes(c))w=5},30)}
 const ev2=k=>{if(cat[k])say(R(L(cat[k])))};
 function paint(){const c=cat.h?cat.h[hd].c:cat.c;$('bd').style.setProperty('--c1',c[0]);$('bd').style.setProperty('--c2',c[1])}
 function build(){
@@ -354,7 +366,7 @@ function apply(m){
   if(m.captured&&cat.pc)ev2('pc');
   slowT=setTimeout(()=>{if(!over)ev2('sl')},25000)}}
 function taunt(){
- if(G.history().length==1&&cat.op)say(typeof cat.op=='string'?cat.op:cat.op[st.lang]);
+ if(G.history().length==1&&cat.op)say(typeof cat.op=='string'?cat.op:L(cat.op)[0]||cat.op[st.lang]);
  else if(cat.tk&&Math.random()<.55)say(R(L(cat.tk)))}
 function endCheck(){
  if(!G.game_over())return false;
@@ -378,7 +390,6 @@ function catMove(){
  eng.postMessage('go movetime '+Math.round(300+elo/6))}
 setInterval(()=>{if(cat&&G&&!over&&!busy&&cat.rd&&Math.random()<.5)ev2('rd')},30000);
 
-/* screens */
 function go(i){
  cat=CATS[i];startEng();
  const f=cat.m||'cedar_and_morning_air.mp3';
