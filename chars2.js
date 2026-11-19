@@ -120,3 +120,4 @@ window.MORE=[
  w:B(['مياو! فزت! أعطني سمكة!'],["Meow! I won! Give me a fish!"]),
  l:B(['مياو! خليتك تفوز... الآن أعطني سمكة!'],["Meow! I let you win... now give me a fish!"])}
 ];
+document.head.appendChild(Object.assign(document.createElement('script'),{src:'en.js'}));
