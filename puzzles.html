@@ -8,7 +8,7 @@
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;min-height:100vh;font-family:'Courier New',monospace;color:#fff;text-align:center;background:#000 url(puzzle_bg.gif) center/cover fixed,url(IMG_1727.jpeg) center/cover fixed}
-#bgv{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+#bgv{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;background:#000}
 body::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:-1}
 .w{position:relative;max-width:520px;margin:auto;padding:14px 10px}
 .bar{display:flex;justify-content:space-between;align-items:center}
@@ -37,7 +37,11 @@ h1{text-shadow:3px 3px 0 #b9e769;letter-spacing:2px}
 </style>
 </head>
 <body>
-<video id="bgv" autoplay muted loop playsinline><source src="puzzle_bg.mp4" type="video/mp4"></video>
+<video id="bgv" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="IMG_1727.jpeg">
+  <source src="From%2520Klickpin.com-%2520Try%2520Unique%2520DIY%2520gift%2520ideas%2520that%2520help%2520you%2520create%2520a%2520beautiful%2520result%2520without%2520overspending%2520for%2520ideas%2520worth%2520saving%2520right%2520now-pin-id-.mov">
+  <source src="puzzle_bg.mov">
+  <source src="puzzle_bg.mp4">
+</video>
 <div class="w">
   <div class="bar"><a id="bk" href="index.html" style="color:#fff"></a><span><button id="bl"></button><button id="bs"></button></span></div>
   <h1 id="h"></h1>
@@ -62,8 +66,13 @@ ar:{title:'الألغاز',back:'رجوع →',m1:'ألغاز الشطرنج',d1
 const t=k=>T[st.lang][k];
 const CH=[{n:'Catot',i:'IMG_1770.jpeg',avg:20},{n:'Clown Cat',i:'IMG_1769.jpeg',avg:16},{n:'The Obsessed Cat',i:'IMG_1705.png',avg:11},{n:'Professor Kleem',i:'IMG_1751.jpeg',avg:8},{n:'Dracula',i:'IMG_1775.jpeg',avg:6}];
 
-const bv=document.querySelector('#bgv source');
-if(bv)bv.onerror=()=>{$('bgv').remove()};
+/* background video: the picture shows first, the video plays on the first touch if autoplay is blocked */
+const bgv=$('bgv');
+function pv(){if(bgv&&bgv.paused)bgv.play().catch(()=>{})}
+pv();
+document.addEventListener('pointerdown',pv);
+const lastS=document.querySelector('#bgv source:last-child');
+if(lastS)lastS.onerror=()=>{bgv.remove()};
 
 let ac;
 function snd(k){if(!st.sfx)return;ac=ac||new(window.AudioContext||window.webkitAudioContext)();
