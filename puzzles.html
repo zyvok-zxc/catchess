@@ -7,22 +7,27 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;min-height:100vh;font-family:'Courier New',monospace;color:#fff;text-align:center;background:#000 url(IMG_1727.jpeg) center/cover fixed}
-body::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.6)}
+body{margin:0;min-height:100vh;font-family:'Courier New',monospace;color:#fff;text-align:center;background:#000 url(puzzle_bg.gif) center/cover fixed,url(IMG_1727.jpeg) center/cover fixed}
+#bgv{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+body::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:-1}
 .w{position:relative;max-width:520px;margin:auto;padding:14px 10px}
 .bar{display:flex;justify-content:space-between;align-items:center}
-button,.card{font-family:inherit;color:#fff;background:rgba(0,0,0,.85);border:3px solid #fff;cursor:pointer}
-button{padding:8px 14px;font-size:1rem;margin:4px}
-h1{text-shadow:3px 3px 0 #ff1493;letter-spacing:2px}
-.card{display:block;width:100%;padding:16px;margin:12px 0;font-size:1.15rem;box-shadow:4px 4px 0 #ff1493;text-align:start}
-.card small{display:block;color:#ccc;margin-top:4px}
+button{font:700 1rem Inter,Arial,sans-serif;color:#b9f27a;background:#173b2b;border:4px solid #b9e769;padding:8px 14px;margin:4px;cursor:pointer}
+h1{text-shadow:3px 3px 0 #b9e769;letter-spacing:2px}
+.mb{display:block;width:100%;margin:16px 0 6px;padding:30px 8px;font:800 clamp(1.3rem,6.2vw,2.1rem)/1.1 Inter,Arial,sans-serif;text-transform:uppercase;border:8px solid #b9e769;position:relative;letter-spacing:.5px}
+.mb::before{content:"";position:absolute;inset:3px;border:3px solid rgba(255,255,255,.2);pointer-events:none}
+.mb1{background:#173b2b;color:#b9f27a}
+.mb2{background:#d3f09a;color:#1f4a2c;box-shadow:inset 0 10px 0 rgba(255,255,255,.55)}
+.mb3{background:#214b30;color:#e4f7c0;font-weight:400}
+.mb4{background:#2b3b30;color:#8a9a8a;border-color:#6b7a5c;cursor:not-allowed}
+.cap{color:#b9f27a;font-size:.85rem;margin-bottom:12px}
+.card{display:block;width:100%;padding:12px;margin:12px 0;font-size:1.1rem;background:#173b2b;color:#e4f7c0;border:5px solid #b9e769;cursor:pointer;text-align:start}
 .card img{width:60px;height:60px;object-fit:contain;background:#fff;border-radius:8px;vertical-align:middle;margin-inline-end:10px}
-.lock{opacity:.5;cursor:not-allowed;border-color:#777;box-shadow:none}
 #game{display:none}
 #hud{font-size:1.1rem;margin:8px 0}
 #hud img{width:34px;height:34px;object-fit:contain;background:#fff;border-radius:6px;vertical-align:middle}
-#msg{min-height:26px;margin:6px 0;background:rgba(0,0,0,.7);padding:6px;border:2px solid #ff1493}
-#bd{direction:ltr;position:relative;width:min(96vw,480px);aspect-ratio:1;margin:8px auto;border:4px solid #fff;user-select:none}
+#msg{min-height:26px;margin:6px 0;background:rgba(0,0,0,.7);padding:6px;border:2px solid #b9e769}
+#bd{direction:ltr;position:relative;width:min(96vw,480px);aspect-ratio:1;margin:8px auto;border:4px solid #b9e769;user-select:none}
 .sq{position:absolute;width:12.5%;height:12.5%;display:flex;align-items:center;justify-content:center;font-size:min(10vw,52px);line-height:1}
 .sq.l{box-shadow:inset 0 0 0 100px rgba(255,235,59,.45)}
 .sq.s{box-shadow:inset 0 0 0 100px rgba(255,235,59,.7)}
@@ -32,6 +37,7 @@ h1{text-shadow:3px 3px 0 #ff1493;letter-spacing:2px}
 </style>
 </head>
 <body>
+<video id="bgv" autoplay muted loop playsinline><source src="puzzle_bg.mp4" type="video/mp4"></video>
 <div class="w">
   <div class="bar"><a id="bk" href="index.html" style="color:#fff"></a><span><button id="bl"></button><button id="bs"></button></span></div>
   <h1 id="h"></h1>
@@ -47,15 +53,17 @@ h1{text-shadow:3px 3px 0 #ff1493;letter-spacing:2px}
 
 <script>
 const $=id=>document.getElementById(id);
-const R=a=>a[Math.floor(Math.random()*a.length)];
 const S=JSON.parse(localStorage.getItem('cc')||'{}');
 const st={lang:S.lang||'en',music:S.music!==false,sfx:S.sfx!==false};
 const save=()=>localStorage.setItem('cc',JSON.stringify(Object.assign(JSON.parse(localStorage.getItem('cc')||'{}'),st)));
 const T={
-en:{title:'PUZZLES',back:'← Back',m1:'Puzzle Ladder',d1:'Every puzzle you solve makes the next one harder',m2:'Speed Challenge',d2:'Solve as many puzzles as you can in 90 seconds',m3:'Character Race',d3:'Race the top 5 characters in a 90-second puzzle duel',m4:'Forbidden Files',d4:'Secret case files... coming soon',pick:'Pick your rival',hint:'Hint',skip:'Skip',menu:'Menu',lvl:'Level',time:'Time',you:'You',mate:'Mate in',play:'You play',w:'White',b:'Black',wrong:'Wrong move!',ok:'Correct!',go:'Game over',won:'You won the race!',lost:'The rival won.',tie:'A tie!',reach:'You reached level',solved:'You solved',lang:'Language',sfx:'Sounds',on:'ON',off:'OFF'},
-ar:{title:'الألغاز',back:'رجوع →',m1:'سلّم الألغاز',d1:'كل لغز تحله يصير اللي بعده أصعب',m2:'تحدي السرعة',d2:'حل أكبر عدد من الألغاز خلال 90 ثانية',m3:'سباق الشخصيات',d3:'سباق ألغاز 90 ثانية ضد أقوى 5 شخصيات',m4:'الملفات المحظورة',d4:'ملفات قضايا سرية... قريباً',pick:'اختر خصمك',hint:'تلميح',skip:'تخطّي',menu:'القائمة',lvl:'المستوى',time:'الوقت',you:'أنت',mate:'كش مات في',play:'تلعب',w:'الأبيض',b:'الأسود',wrong:'نقلة خاطئة!',ok:'صح!',go:'انتهت اللعبة',won:'فزت بالسباق!',lost:'فاز الخصم.',tie:'تعادل!',reach:'وصلت للمستوى',solved:'حللت',lang:'اللغة',sfx:'الأصوات',on:'تشغيل',off:'إيقاف'}};
+en:{title:'PUZZLES',back:'← Back',m1:'Chess Puzzles',d1:'Puzzle ladder: every puzzle you solve makes the next one harder',m2:'Speed Challenge',d2:'Solve as many puzzles as you can in 90 seconds',m3:'Character Race',d3:'Race the top 5 characters in a 90-second puzzle duel',m4:'Forbidden Files',d4:'Secret case files... coming soon',pick:'Pick your rival',hint:'Hint',skip:'Skip',menu:'Menu',lvl:'Level',you:'You',mate:'Mate in',play:'You play',w:'White',b:'Black',wrong:'Wrong move!',ok:'Correct!',go:'Game over',won:'You won the race!',lost:'The rival won.',tie:'A tie!',reach:'You reached level',solved:'You solved',on:'ON',off:'OFF'},
+ar:{title:'الألغاز',back:'رجوع →',m1:'ألغاز الشطرنج',d1:'سلّم الألغاز: كل لغز تحله يصير اللي بعده أصعب',m2:'تحدي السرعة',d2:'حل أكبر عدد من الألغاز خلال 90 ثانية',m3:'سباق الشخصيات',d3:'سباق ألغاز 90 ثانية ضد أقوى 5 شخصيات',m4:'الملفات المحظورة',d4:'ملفات قضايا سرية... قريباً',pick:'اختر خصمك',hint:'تلميح',skip:'تخطّي',menu:'القائمة',lvl:'المستوى',you:'أنت',mate:'كش مات في',play:'تلعب',w:'الأبيض',b:'الأسود',wrong:'نقلة خاطئة!',ok:'صح!',go:'انتهت اللعبة',won:'فزت بالسباق!',lost:'فاز الخصم.',tie:'تعادل!',reach:'وصلت للمستوى',solved:'حللت',on:'تشغيل',off:'إيقاف'}};
 const t=k=>T[st.lang][k];
 const CH=[{n:'Catot',i:'IMG_1770.jpeg',avg:20},{n:'Clown Cat',i:'IMG_1769.jpeg',avg:16},{n:'The Obsessed Cat',i:'IMG_1705.png',avg:11},{n:'Professor Kleem',i:'IMG_1751.jpeg',avg:8},{n:'Dracula',i:'IMG_1775.jpeg',avg:6}];
+
+const bv=document.querySelector('#bgv source');
+if(bv)bv.onerror=()=>{$('bgv').remove()};
 
 let ac;
 function snd(k){if(!st.sfx)return;ac=ac||new(window.AudioContext||window.webkitAudioContext)();
@@ -67,7 +75,8 @@ mu.addEventListener('loadedmetadata',()=>{mu.currentTime=+localStorage.getItem('
 setInterval(()=>{if(!mu.paused)localStorage.setItem('cc_t',mu.currentTime)},1000);
 document.addEventListener('pointerdown',()=>{if(st.music)mu.play().catch(()=>{})},{once:true});
 
-/* puzzle generator: forcing mates (mate in 1, 2 or 3), found by code */
+/* puzzle generator: forcing mates (mate in 1, 2 or 3). It runs in a background worker so the page stays smooth. */
+function R(a){return a[Math.floor(Math.random()*a.length)]}
 function mate(g,n){
  const ms=g.moves({verbose:true});
  for(const m of ms){
@@ -91,12 +100,19 @@ function find(n){
     if(c==1&&ms.length>=8)return{fen:g.fen(),n}}
    else if(!g.in_check()&&mate(g,n)&&!mate(g,n-1))return{fen:g.fen(),n}}}
  return null}
+
 const pool={1:[],2:[],3:[]};
-function fill(){
- let busyF=false;
- for(const n of [1,2,3])if(pool[n].length<4){const p=find(n);if(p)pool[n].push(p);busyF=true;break}
- setTimeout(fill,busyF?80:600)}
-fill();
+let wk=null;const req={1:0,2:0,3:0};
+function fillW(){
+ if(!wk)return;
+ for(const n of [1,2,3])while(pool[n].length+req[n]<4){req[n]++;wk.postMessage(n)}}
+try{
+ const code='importScripts("https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js");'+[R,mate,find].map(f=>f.toString()).join(';')+';onmessage=function(e){var p=null;while(!p)p=find(e.data);postMessage(p)}';
+ wk=new Worker(URL.createObjectURL(new Blob([code],{type:'text/javascript'})));
+ wk.onmessage=e=>{const p=e.data;req[p.n]--;pool[p.n].push(p);fillW()};
+ wk.onerror=()=>{wk=null};
+ fillW();
+}catch(x){wk=null}
 
 /* game */
 let G,pz,sel=null,last=[],flip=false,mode,ch,lives,score,level,tleft,tid,cid,csc,over=true,busy=false;
@@ -106,7 +122,7 @@ function build(){
  let h='';
  for(let y=0;y<8;y++)for(let x=0;x<8;x++){
   const fx=flip?7-x:x,fy=flip?7-y:y,n='abcdefgh'[fx]+(8-fy),p=G.get(n);
-  h+='<div class="sq'+(last.includes(n)?' l':'')+(sel==n?' s':'')+(hints.includes(n)?' d':'')+'" data-s="'+n+'" style="left:'+x*12.5+'%;top:'+y*12.5+'%;background:'+((x+y)%2?'#4c1d95':'#c4b5fd')+'">'+(p?'<span class="p'+p.color+'">'+GL[p.type]+'\uFE0E</span>':'')+'</div>'}
+  h+='<div class="sq'+(last.includes(n)?' l':'')+(sel==n?' s':'')+(hints.includes(n)?' d':'')+'" data-s="'+n+'" style="left:'+x*12.5+'%;top:'+y*12.5+'%;background:'+((x+y)%2?'#214b30':'#d3f09a')+'">'+(p?'<span class="p'+p.color+'">'+GL[p.type]+'\uFE0E</span>':'')+'</div>'}
  $('bd').innerHTML=h}
 $('bd').onclick=e=>{const s=e.target.closest('.sq');if(s)click(s.dataset.s)};
 function click(sq){
@@ -117,7 +133,7 @@ function click(sq){
 function msg(x){$('msg').textContent=x}
 function hud(){
  let s='';
- if(mode=='ladder')s=t('lvl')+' '+level+' · ♥'.repeat(1)+lives+' · ✔'+score;
+ if(mode=='ladder')s=t('lvl')+' '+level+' · ♥'+lives+' · ✔'+score;
  else{s='⏱ '+tleft+'s · '+t('you')+' '+score;
   if(ch)s+=' — <img src="'+ch.i+'"> '+ch.n+' '+csc}
  $('hud').innerHTML=s}
@@ -125,8 +141,10 @@ function lvN(){return mode=='ladder'?(level<=3?1:level<=6?2:3):R([1,1,2,2,3])}
 function nextP(){
  if(over)return;
  const n=lvN();
- if(pool[n].length)load(pool[n].shift());
- else{msg('...');setTimeout(()=>{const p=find(n);p?load(p):nextP()},30)}}
+ if(pool[n].length){load(pool[n].shift());fillW();return}
+ msg('...');
+ if(wk)setTimeout(nextP,200);
+ else setTimeout(()=>{const p=find(n);p?load(p):nextP()},30)}
 function load(p){
  G=new Chess(p.fen);pz={n:p.n,rem:p.n,att:G.turn()};
  flip=pz.att=='b';sel=null;last=[];busy=false;
@@ -186,10 +204,10 @@ function ui(){
  $('bs').textContent='🔊 '+t(st.sfx?'on':'off');
  $('hb').textContent=t('hint');$('sk').textContent=t('skip');$('mb').textContent=t('menu');
  $('menu').innerHTML=
-  '<div class="card" onclick="start(\'ladder\')">🪜 '+t('m1')+'<small>'+t('d1')+'</small></div>'+
-  '<div class="card" onclick="start(\'speed\')">⏱ '+t('m2')+'<small>'+t('d2')+'</small></div>'+
-  '<div class="card" onclick="showPick()">😼 '+t('m3')+'<small>'+t('d3')+'</small></div>'+
-  '<div class="card lock">🔒 '+t('m4')+'<small>'+t('d4')+'</small></div>';
+  '<button class="mb mb1" onclick="start(\'ladder\')">♟ '+t('m1')+'</button><div class="cap">01 — '+t('d1')+'</div>'+
+  '<button class="mb mb2" onclick="start(\'speed\')">'+t('m2')+'</button><div class="cap">02 — '+t('d2')+'</div>'+
+  '<button class="mb mb3" onclick="showPick()">✦ '+t('m3')+'</button><div class="cap">03 — '+t('d3')+'</div>'+
+  '<button class="mb mb4" disabled>🔒 '+t('m4')+'</button><div class="cap">04 — '+t('d4')+'</div>';
  $('pickc').innerHTML='<h3>'+t('pick')+'</h3>'+CH.map((c,i)=>'<div class="card" onclick="start(\'race\',CH['+i+'])"><img src="'+c.i+'">'+c.n+'</div>').join('')}
 function showPick(){$('menu').style.display='none';$('pickc').style.display='block'}
 $('bl').onclick=()=>{st.lang=st.lang=='en'?'ar':'en';save();ui()};
