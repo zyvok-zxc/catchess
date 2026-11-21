@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cat Chess - Forbidden Files</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;font-family:'Courier New',monospace;color:#fff;text-align:center;background:#0b0b0b url(IMG_1727.jpeg) center/cover fixed}
+body::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:-1}
+.w{max-width:520px;margin:auto;padding:14px 10px}
+.bar{display:flex;justify-content:space-between;align-items:center}
+button{font:700 1rem 'Courier New',monospace;color:#f3e9c8;background:#2a1d12;border:3px solid #c9b47a;padding:8px 14px;margin:4px;cursor:pointer}
+a{color:#f3e9c8}
+h1{letter-spacing:3px;color:#f3e9c8;text-shadow:3px 3px 0 #a31515}
+#rank{background:#efe6c8;color:#2a1d12;border:3px solid #c9b47a;padding:8px;margin:8px 0;font-weight:bold}
+.file{display:flex;align-items:center;justify-content:space-between;text-align:start;background:#efe6c8;color:#2a1d12;border:3px solid #c9b47a;padding:12px;margin:10px 0;cursor:pointer;position:relative}
+.file small{display:block;color:#6b5a3a}
+.file.lk{opacity:.45;cursor:not-allowed}
+.file.sv{border-color:#2e7d32}
+.file.sec{background:#1a1a1a;color:#f3e9c8;border-color:#a31515}
+.tag{font-weight:bold;border:2px solid;padding:2px 6px;transform:rotate(-6deg)}
+.sv .tag{color:#2e7d32}.lk .tag{color:#777}.op .tag{color:#a31515}
+#case{display:none}
+.paper{background:#efe6c8;color:#2a1d12;border:3px solid #c9b47a;padding:12px;margin:8px 0;text-align:start;position:relative}
+.stamp{position:absolute;top:8px;inset-inline-end:8px;color:#a31515;border:3px solid #a31515;padding:2px 8px;font-weight:bold;transform:rotate(8deg);opacity:.85}
+.inv{display:flex;gap:10px;align-items:flex-start;margin-top:8px}
+.inv img{width:64px;height:64px;object-fit:contain;background:#fff;border:2px solid #2a1d12;flex:none}
+#story{flex:1;min-height:70px}
+#obj{margin-top:8px;font-weight:bold;color:#a31515}
+#sus{display:flex;gap:6px;margin:8px 0}
+.su{flex:1;background:#efe6c8;color:#2a1d12;border:2px solid #c9b47a;padding:6px;font-size:.75rem;text-align:start}
+.su img{width:40px;height:40px;object-fit:contain;background:#fff;display:block;margin-bottom:4px}
+.su.ok{border-color:#2e7d32;background:#d8f0d0}
+#msg{min-height:28px;margin:6px 0;background:rgba(0,0,0,.7);padding:6px;border:2px solid #c9b47a}
+#bd{direction:ltr;position:relative;width:min(96vw,480px);aspect-ratio:1;margin:8px auto;border:4px solid #c9b47a;user-select:none}
+.sq{position:absolute;width:12.5%;height:12.5%;display:flex;align-items:center;justify-content:center;font-size:min(10vw,52px);line-height:1}
+.sq.l{box-shadow:inset 0 0 0 100px rgba(255,235,59,.45)}
+.sq.s{box-shadow:inset 0 0 0 100px rgba(255,235,59,.7)}
+.sq.d::after{content:"";position:absolute;inset:36%;border-radius:50%;background:rgba(0,0,0,.4)}
+.pw{color:#fff;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
+.pb{color:#000;text-shadow:0 0 2px #fff,0 0 2px #fff}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="bar"><a id="bk" href="puzzles.html"></a><button id="bl"></button></div>
+  <h1 id="h"></h1>
+  <div id="rank"></div>
+  <div id="list"></div>
+  <div id="case">
+    <div class="paper">
+      <div class="stamp" id="stp"></div>
+      <div id="fno"></div><h2 id="ttl" style="margin:4px 0"></h2>
+      <div class="inv"><img id="inv"><div id="story"></div></div>
+      <div id="obj"></div>
+    </div>
+    <div id="sus"></div>
+    <div id="bd"></div>
+    <div id="msg"></div>
+    <button id="rs"></button><button id="mb"></button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const S=JSON.parse(localStorage.getItem('cc')||'{}');
+const st={lang:S.lang||'en',sfx:S.sfx!==false};
+const save=()=>localStorage.setItem('cc',JSON.stringify(Object.assign(JSON.parse(localStorage.getItem('cc')||'{}'),st)));
+const L=x=>x[st.lang=='ar'?1:0];
+const T={
+ title:['FORBIDDEN FILES','الملفات المحظورة'],back:['← Back','رجوع →'],file:['FILE','ملف'],
+ open:['OPEN','مفتوح'],locked:['LOCKED','مقفل'],solved:['SOLVED','محلول'],secret:['SECRET','سري'],
+ secname:['The Unmarked File','الملف بلا اسم'],rank:['Rank','الرتبة'],cases:['cases solved','قضايا محلولة'],
+ mate:['Mate in','كش مات في'],play:['You play','تلعب'],w:['White','الأبيض'],b:['Black','الأسود'],
+ wrong:['Dead end, detective. Try again.','طريق مسدود يا محقق. حاول مرة ثانية.'],
+ ok:['CASE CLOSED.','أُغلقت القضية.'],honest:['The honest one was','الصادق كان'],
+ reset:['Reset board','أعد الرقعة'],files:['All files','كل الملفات'],prep:['Preparing the evidence...','نجهّز الأدلة...'],
+ sus:['Suspects','المشتبه بهم'],unlock:['A secret file was unlocked!','انفتح ملف سري!']};
+const t=k=>L(T[k]);
+const RK=[[0,'Lost Pawn','بيدق تائه'],[2,'Observer','المراقب'],[5,'Suspect','المشتبه به'],[9,'Mastermind','العقل المدبر'],[13,'Phantom of the Board','شبح الرقعة'],[15,'The Grand Phantom','الشبح الأعظم']];
+const INV=[{n:'Professor Kleem',i:'IMG_1751.jpeg'},{n:'Cat OK',i:'IMG_1778.jpeg'},{n:"Mal'aqa",i:'IMG_1753.jpeg'},{n:'Stupi',i:'IMG_1748.jpeg'},{n:'Catot',i:'IMG_1770.jpeg'},{n:'Clown Cat',i:'IMG_1769.jpeg'},{n:'Dracula',i:'IMG_1775.jpeg'}];
+const SUS=[
+ {n:'Clown Cat',i:'IMG_1769.jpeg',s:['Hehe... {m}. What could possibly go wrong?','هههه... {m}. وش اللي ممكن يخرب؟']},
+ {n:'Catot',i:'IMG_1770.jpeg',s:['Logic says {m}. Or does it? Check again.','المنطق يقول {m}. أو لا؟ راجع مرة ثانية.']},
+ {n:'Dracula',i:'IMG_1775.jpeg',s:['{m}. It was always going to end this way.','{m}. كان هذا مصيره منذ البداية.']}];
+const F=[
+{id:1,n:1,t:['The Empty Chair','الكرسي الفارغ'],s:['The night clerk of the Harbor Hotel vanished. His last call named one man. The suspect is cornered in his own trap. Deliver the final move.','اختفى موظف الاستقبال الليلي من فندق الميناء. آخر اتصال له ذكر رجلاً واحداً. المشتبه به محاصر في فخه. وجّه الضربة الأخيرة.']},
+{id:2,n:1,t:['Ledger of Ash','رماد الدفتر'],s:['Someone burned the ledger at Dock 9, but one page survived. It points to the foreman. Corner him before he reaches the ferry.','أحرق أحدهم دفتر الحسابات في الرصيف التاسع، لكن صفحة واحدة نجت وتشير إلى المشرف. حاصره قبل أن يصل إلى العبّارة.']},
+{id:3,n:1,t:['The Quiet Witness','الشاهد الصامت'],s:['The only witness never spoke in court. Tonight he talked. The suspect has one square left to breathe. Take it away.','الشاهد الوحيد لم ينطق في المحكمة قط. الليلة تكلم. أمام المشتبه به مربع واحد يتنفس منه. خذه منه.']},
+{id:4,n:2,t:['The Gilded Key','المفتاح المذهّب'],s:['A brass key opened a vault that was never forced. The thief used the inside door. End it in two moves.','فتح مفتاح نحاسي خزنة لم تُكسر قط. السارق دخل من الباب الداخلي. أنهِ القضية بنقلتين.']},
+{id:5,n:2,t:['Midnight Ferry','عبّارة منتصف الليل'],s:['The ferry left with one passenger too many, and no name on the list. Two moves of pressure will expose him.','غادرت العبّارة وعليها راكب زائد ولا اسم له في القائمة. ضغطتان متتاليتان تكشفانه.']},
+{id:6,n:2,t:["The Forger's Hand",'يد المزوّر'],s:['One signature appeared on three deeds in a single night. The forger left a pattern. Follow it with two forcing moves.','ظهر توقيع واحد على ثلاثة سندات في ليلة واحدة. ترك المزوّر نمطاً. اتبعه بنقلتين قسريتين.']},
+{id:7,n:2,t:['Silent Alarm','إنذار صامت'],s:["The alarm never rang, but the guard's radio did. Someone knew the order of the doors. Check, then check again.",'لم يرنّ الإنذار، لكن جهاز الحارس رنّ. أحدهم عرف ترتيب الأبواب. كش، ثم كش مرة أخرى.']},
+{id:8,n:2,t:['The Lighthouse Letters','رسائل المنارة'],s:['Letters keep arriving from a lighthouse abandoned for years, each naming a street. Walk the suspect into the last one.','تصل رسائل من منارة مهجورة منذ سنوات، وكل رسالة تحمل اسم شارع. أدخل المشتبه به إلى الشارع الأخير.']},
+{id:9,n:2,t:['Vault Under the Chess Club','القبو تحت نادي الشطرنج'],s:['Under the old chess club lies a vault nobody admits to. Its owner plays only forcing moves. Match him.','تحت نادي الشطرنج القديم قبو لا يعترف به أحد. صاحبه لا يلعب إلا نقلات قسرية. قابله بالمثل.']},
+{id:10,n:3,t:['The Third Alibi','الغطاء الثالث'],s:['Three alibis, one liar. The pattern repeats on the board. Force the truth out in three moves.','ثلاث حجج غياب وكاذب واحد. يتكرر النمط على الرقعة. انتزع الحقيقة في ثلاث نقلات.']},
+{id:11,n:3,t:['Black Ink Tuesday','ثلاثاء الحبر الأسود'],s:["Every Tuesday a newspaper prints a coded line. Today's decodes to a king's escape. Close every door in three.",'كل ثلاثاء تطبع صحيفة سطراً مشفّراً. سطر اليوم يفكّ هروب ملك. أغلق كل الأبواب في ثلاث.']},
+{id:12,n:3,t:['The Pawn Broker','تاجر الرهن'],s:['He sold evidence for a price. Now his buyers are the pieces around him. Three checks end the market.','باع الأدلة بثمن. الآن مشتروه هم القطع حوله. ثلاثة كشوفات تنهي السوق.']},
+{id:13,n:3,t:['Room 64','الغرفة 64'],s:['A hotel room that is on no floor plan. Its tenant is the key to the whole case. Three forcing moves.','غرفة فندق لا توجد في أي مخطط. نزيلها مفتاح القضية كلها. ثلاث نقلات قسرية.']},
+{id:14,n:3,t:["The Grandmaster's Debt",'دين الأستاذ الكبير'],s:['A great player owes money to dangerous people. His king hides, but his debt shows. Collect in three.','لاعب عظيم مدين لأناس خطرين. يختبئ ملكه لكن دينه ظاهر. حصّل الدين في ثلاث.']},
+{id:15,n:3,t:['The 64th Secret','السر الرابع والستون'],s:['The last file. Every earlier case pointed here. No witness is left but the board. Finish it.','الملف الأخير. كل القضايا السابقة أشارت إلى هنا. لم يبق شاهد سوى الرقعة. أنهِها.']},
+{id:16,n:3,sec:1,t:['The Unmarked File','الملف بلا اسم'],s:['This file was never filed. You earned it with five clean cases. One position, no witnesses, no mercy.','ملف لم يُسجّل قط. حصلت عليه بخمس قضايا نظيفة. وضع واحد، بلا شهود، بلا رحمة.']}];
+
+/* sounds */
+let ac;
+function tone(f,d,v){if(!st.sfx)return;ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),t0=ac.currentTime;o.type='square';o.frequency.value=f;g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(.001,t0+d);o.connect(g);g.connect(ac.destination);o.start(t0);o.stop(t0+d)}
+let tw=null;
+function type(el,s){
+ clearInterval(tw);el.textContent='';let i=0,w=0;
+ tw=setInterval(()=>{
+  if(w>0){w--;return}
+  if(i>=s.length){clearInterval(tw);return}
+  const c=s[i++];el.textContent=s.slice(0,i);
+  if(c!=' ')tone(300+Math.random()*120,.05,.04);
+  if('.!?؟،,'.includes(c))w=5},30)}
+
+/* puzzle generator in a background worker (forcing mates) */
+function R(a){return a[Math.floor(Math.random()*a.length)]}
+function mate(g,n){
+ const ms=g.moves({verbose:true});
+ for(const m of ms){
+  g.move(m);let ok=false;
+  if(g.in_checkmate())ok=true;
+  else if(n>1&&g.in_check()&&!g.game_over()){
+   const rs=g.moves();
+   ok=rs.length>0&&rs.every(r=>{g.move(r);const x=mate(g,n-1);g.undo();return x})}
+  g.undo();
+  if(ok)return m}
+ return null}
+function find(n){
+ for(let tr=0;tr<2;tr++){
+  const g=new Chess(),k=14+Math.floor(Math.random()*40);
+  for(let i=0;i<k&&!g.game_over();i++){
+   g.move(R(g.moves()));
+   if(i<10||g.game_over())continue;
+   if(n==1){
+    const ms=g.moves({verbose:true});let c=0;
+    for(const m of ms){g.move(m);if(g.in_checkmate())c++;g.undo()}
+    if(c==1&&ms.length>=8)return{fen:g.fen(),n}}
+   else if(!g.in_check()&&mate(g,n)&&!mate(g,n-1))return{fen:g.fen(),n}}}
+ return null}
+let wk=null;const q=[];
+try{
+ const code='importScripts("https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js");'+[R,mate,find].map(f=>f.toString()).join(';')+';onmessage=function(e){var p=null;while(!p)p=find(e.data);postMessage(p)}';
+ wk=new Worker(URL.createObjectURL(new Blob([code],{type:'text/javascript'})));
+ wk.onmessage=e=>{const cb=q.shift();if(cb)cb(e.data)};
+ wk.onerror=()=>{wk=null};
+}catch(x){wk=null}
+function ask(n,cb){
+ if(wk){q.push(cb);wk.postMessage(n)}
+ else setTimeout(()=>{const p=find(n);p?cb(p):ask(n,cb)},30)}
+
+/* progress */
+const done=()=>JSON.parse(localStorage.getItem('cc_files')||'[]');
+const streak=()=>+localStorage.getItem('cc_streak')||0;
+function rankOf(c){let r=RK[0];for(const x of RK)if(c>=x[0])r=x;return r}
+function render(){
+ const D=done(),c=D.filter(x=>x<16).length,r=rankOf(c);
+ document.documentElement.dir=st.lang=='ar'?'rtl':'ltr';
+ $('h').textContent=t('title');$('bk').textContent=t('back');
+ $('bl').textContent=st.lang=='en'?'العربية':'English';
+ $('rank').textContent=t('rank')+': '+r[st.lang=='ar'?2:1]+' · '+c+'/15 '+t('cases');
+ $('rs').textContent=t('reset');$('mb').textContent=t('files');
+ let h='';
+ F.forEach(f=>{
+  const sv=D.includes(f.id);
+  if(f.sec){if(!sv&&streak()<5)return}
+  const op=f.sec||f.id==1||D.includes(f.id-1);
+  const cls='file '+(f.sec?'sec ':'')+(sv?'sv':op?'op':'lk');
+  h+='<div class="'+cls+'"'+(op||sv?' onclick="openCase('+f.id+')"':'')+'><div>'+t('file')+' '+String(f.id).padStart(3,'0')+'<b> — '+(f.sec?t('secname'):L(f.t))+'</b><small>'+(f.n==1?'★':f.n==2?'★★':'★★★')+'</small></div><span class="tag">'+t(sv?'solved':op?'open':'locked')+(f.sec&&!sv?' ★':'')+'</span></div>'});
+ $('list').innerHTML=h}
+
+/* case */
+let G,F0,pz,sel=null,last=[],flip=false,busy=false,solved=false,wrong=0,honest=-1,sus=[];
+const GL={p:'♟',n:'♞',b:'♝',r:'♜',q:'♛',k:'♚'};
+function after(g,n){
+ let ok=g.in_checkmate();
+ if(!ok&&n>1&&g.in_check()&&!g.game_over()){
+  const rs=g.moves();
+  ok=rs.length>0&&rs.every(r=>{g.move(r);const x=mate(g,n-1);g.undo();return x})}
+ return ok}
+function isGood(g,m,n){g.move(m);const ok=after(g,n);g.undo();return ok}
+function build(){
+ const hints=sel?G.moves({square:sel,verbose:true}).map(m=>m.to):[];
+ let h='';
+ for(let y=0;y<8;y++)for(let x=0;x<8;x++){
+  const fx=flip?7-x:x,fy=flip?7-y:y,n='abcdefgh'[fx]+(8-fy),p=G.get(n);
+  h+='<div class="sq'+(last.includes(n)?' l':'')+(sel==n?' s':'')+(hints.includes(n)?' d':'')+'" data-s="'+n+'" style="left:'+x*12.5+'%;top:'+y*12.5+'%;background:'+((x+y)%2?'#7a5c3a':'#d9c9a0')+'">'+(p?'<span class="p'+p.color+'">'+GL[p.type]+'\uFE0E</span>':'')+'</div>'}
+ $('bd').innerHTML=h}
+$('bd').onclick=e=>{const s=e.target.closest('.sq');if(s)click(s.dataset.s)};
+function click(sq){
+ if(solved||busy||!G)return;
+ if(sel&&sel!=sq&&G.moves({square:sel,verbose:true}).some(m=>m.to==sq)){attempt(sel,sq);return}
+ const p=G.get(sq);
+ sel=p&&p.color==pz.att?sq:null;build()}
+function msg(x){$('msg').textContent=x}
+function openCase(id){
+ F0=F.find(f=>f.id==id);solved=false;wrong=0;busy=true;G=null;
+ $('list').style.display='none';$('rank').style.display='none';$('case').style.display='block';
+ const iv=INV[(id-1)%INV.length];
+ $('fno').textContent=t('file')+' '+String(id).padStart(3,'0');
+ $('ttl').textContent=F0.sec?t('secname'):L(F0.t);
+ $('stp').textContent=done().includes(id)?t('solved'):'CONFIDENTIAL';
+ $('inv').src=iv.i;type($('story'),L(F0.s));
+ $('obj').textContent='';$('sus').innerHTML='';$('bd').innerHTML='';msg(t('prep'));
+ const k='cc_fen_'+id,fen=localStorage.getItem(k);
+ if(fen)load(fen);
+ else ask(F0.n,p=>{localStorage.setItem(k,p.fen);load(p.fen)})}
+function load(fen){
+ G=new Chess(fen);pz={rem:F0.n,att:G.turn()};
+ flip=pz.att=='b';sel=null;last=[];busy=false;
+ $('obj').textContent=t('mate')+' '+F0.n+' · '+t('play')+' '+t(pz.att=='w'?'w':'b');
+ msg('');build();suspects()}
+function suspects(){
+ const sm=mate(G,F0.n);
+ if(!sm){$('sus').innerHTML='';return}
+ const ms=G.moves({verbose:true}).filter(m=>!isGood(G,m,F0.n));
+ const pick=ms.sort(()=>Math.random()-.5).sort((a,b)=>(!!b.captured+(b.san.includes('+')?1:0))-(!!a.captured+(a.san.includes('+')?1:0))).slice(0,2);
+ honest=Math.floor(Math.random()*3);
+ const sans=[];let j=0;
+ for(let i=0;i<3;i++)sans.push(i==honest?sm.san:(pick[j++]||sm).san);
+ sus=SUS.map((s,i)=>({s,m:sans[i]}));
+ $('sus').innerHTML=sus.map(x=>'<div class="su"><img src="'+x.s.i+'"><b>'+x.s.n+'</b><br>'+L(x.s.s).replace('{m}',x.m)+'</div>').join('')}
+function attempt(f,to){
+ const m=G.move({from:f,to:to,promotion:'q'});sel=null;
+ if(!after(G,pz.rem)){
+  G.undo();last=[];build();tone(200,.15,.08);msg(t('wrong'));
+  wrong++;localStorage.setItem('cc_streak',0);return}
+ last=[m.from,m.to];build();
+ if(G.in_checkmate()){
+  solved=true;tone(784,.2,.08);
+  const D=done();
+  if(!D.includes(F0.id)){D.push(F0.id);localStorage.setItem('cc_files',JSON.stringify(D))}
+  let extra='';
+  if(wrong==0&&!F0.sec){const s=streak()+1;localStorage.setItem('cc_streak',s);if(s==5)extra=' '+t('unlock')}
+  $('stp').textContent=t('solved');
+  document.querySelectorAll('.su')[honest].classList.add('ok');
+  msg(t('ok')+' '+t('honest')+' '+sus[honest].s.n+'.'+extra);return}
+ tone(880,.1,.08);busy=true;
+ setTimeout(()=>{const r=G.move(R(G.moves()));pz.rem--;last=[r.from,r.to];build();busy=false},450)}
+$('rs').onclick=()=>{if(!F0)return;const fen=localStorage.getItem('cc_fen_'+F0.id);if(fen&&!solved){G=new Chess(fen);pz.rem=F0.n;sel=null;last=[];busy=false;build();msg('')}};
+$('mb').onclick=()=>{clearInterval(tw);$('case').style.display='none';$('list').style.display='block';$('rank').style.display='block';render()};
+$('bl').onclick=()=>{st.lang=st.lang=='en'?'ar':'en';save();render()};
+render();
+</script>
+</body>
+</html>
