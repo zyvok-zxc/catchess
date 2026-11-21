@@ -7,7 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;min-height:100vh;font-family:'Courier New',monospace;color:#fff;text-align:center;background:#0b0b0b url(IMG_1855.jpeg) center/cover fixed}
+body{margin:0;min-height:100vh;font-family:'Courier New',monospace;color:#fff;text-align:center;background:#0b0b0b url(IMG_1857.jpeg) center/cover fixed}
 body::before{content:"";position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:-1}
 .w{max-width:520px;margin:auto;padding:14px 10px}
 .bar{display:flex;justify-content:space-between;align-items:center}
@@ -47,7 +47,7 @@ h1{letter-spacing:3px;color:#f3e9c8;text-shadow:3px 3px 0 #a31515}
 </head>
 <body>
 <div class="w">
-  <div class="bar"><a id="bk" href="puzzles.html"></a><button id="bl"></button></div>
+  <div class="bar"><a id="bk" href="puzzles.html"></a><span><button id="bm"></button><button id="bl"></button></span></div>
   <h1 id="h"></h1>
   <div id="rank"></div>
   <div id="list"></div>
@@ -69,7 +69,7 @@ h1{letter-spacing:3px;color:#f3e9c8;text-shadow:3px 3px 0 #a31515}
 <script>
 const $=id=>document.getElementById(id);
 const S=JSON.parse(localStorage.getItem('cc')||'{}');
-const st={lang:S.lang||'en',sfx:S.sfx!==false};
+const st={lang:S.lang||'en',sfx:S.sfx!==false,music:S.music!==false};
 const save=()=>localStorage.setItem('cc',JSON.stringify(Object.assign(JSON.parse(localStorage.getItem('cc')||'{}'),st)));
 const L=x=>x[st.lang=='ar'?1:0];
 const T={
@@ -83,7 +83,7 @@ const T={
  ok:['CASE CLOSED.','أُغلقت القضية.'],honest:['The honest one was','الصادق كان'],
  files:['All files','كل الملفات'],prep:['Preparing the evidence...','نجهّز الأدلة...'],
  unlock:['A secret file was unlocked!','انفتح ملف سري!'],all:['ALL 15 FILES CLOSED!','أُغلقت الملفات الـ15 كلها!'],
- nrun:['NEW RUN','دورة جديدة']};
+ nrun:['NEW RUN','دورة جديدة'],mus:['Music','الموسيقى'],on:['ON','تشغيل'],off:['OFF','إيقاف']};
 const t=k=>L(T[k]);
 const RK=[[0,'Lost Pawn','بيدق تائه'],[2,'Observer','المراقب'],[5,'Suspect','المشتبه به'],[9,'Mastermind','العقل المدبر'],[13,'Phantom of the Board','شبح الرقعة'],[15,'The Grand Phantom','الشبح الأعظم']];
 const INV=[{n:'Professor Kleem',i:'IMG_1751.jpeg'},{n:'Cat OK',i:'IMG_1778.jpeg'},{n:"Mal'aqa",i:'IMG_1753.jpeg'},{n:'Stupi',i:'IMG_1748.jpeg'},{n:'Catot',i:'IMG_1770.jpeg'},{n:'Clown Cat',i:'IMG_1769.jpeg'},{n:'Dracula',i:'IMG_1775.jpeg'}];
@@ -118,6 +118,10 @@ const UNL={16:s=>s.best>=8,17:s=>s.best>=12,18:s=>s.fast<=3,19:s=>s.clears>=1,20
 /* time limit: starts at 15s and shrinks with every stage (min 6s). Secret files: 10s. */
 const START=15,STEP=.6,MIN=6;
 const limit=f=>f.sec?10:Math.max(MIN,Math.round(START-(f.id-1)*STEP));
+
+/* investigation music */
+const mu=new Audio('midnight_gambit.mp3');mu.loop=true;mu.volume=.3;
+document.addEventListener('pointerdown',()=>{if(st.music)mu.play().catch(()=>{})},{once:true});
 
 let ac;
 function tone(f,d,v){if(!st.sfx)return;ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),t0=ac.currentTime;o.type='square';o.frequency.value=f;g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(.001,t0+d);o.connect(g);g.connect(ac.destination);o.start(t0);o.stop(t0+d)}
@@ -183,6 +187,7 @@ function render(){
  document.documentElement.dir=st.lang=='ar'?'rtl':'ltr';
  $('h').textContent=t('title');$('bk').textContent=t('back');
  $('bl').textContent=st.lang=='en'?'العربية':'English';
+ $('bm').textContent='🎵 '+t(st.music?'on':'off');
  $('mb').textContent=t('files');
  $('rank').textContent=t('rank')+': '+r[st.lang=='ar'?2:1]+' · '+c+'/15 · '+t('best')+': '+s.best;
  let h='';
@@ -198,7 +203,7 @@ function render(){
  $('list').innerHTML=h}
 
 /* case */
-let G,F0,pz,sel=null,last=[],flip=false,busy=false,solved=false,honest=-1,sus=[],tick=null,t0=0,end=0;
+let G,F0,pz,sel=null,last=[],flip=false,busy=false,solved=false,honest=-1,sus=[],tick=null,t0=0,end=0,lastSec=-1;
 const GL={p:'♟',n:'♞',b:'♝',r:'♜',q:'♛',k:'♚'};
 function after(g,n){
  let ok=g.in_checkmate();
@@ -244,11 +249,12 @@ function load(fen){
  const nx=F.find(f=>f.id==F0.id+1);
  if(nx&&!nx.sec&&!localStorage.getItem('cc_fen_'+nx.id))ask(nx.n,p=>{if(!localStorage.getItem('cc_fen_'+nx.id))localStorage.setItem('cc_fen_'+nx.id,p.fen)})}
 function startTimer(){
- clearInterval(tick);t0=Date.now();end=t0+limit(F0)*1000;
+ clearInterval(tick);t0=Date.now();end=t0+limit(F0)*1000;lastSec=-1;
  tick=setInterval(()=>{
-  const left=(end-Date.now())/1000;
+  const left=(end-Date.now())/1000,sc=Math.ceil(left);
   $('tm').textContent='⏱ '+Math.max(0,left).toFixed(1)+'s';
   $('tm').style.color=left<=3?'#ff5252':'#f3e9c8';
+  if(sc!==lastSec&&left>0){lastSec=sc;tone(left<=3?880:220,.04,.03)}
   if(left<=0)fail('t')},100)}
 function fail(r){
  if(solved)return;
@@ -289,6 +295,7 @@ function attempt(f,to){
  setTimeout(()=>{if(solved)return;const r=G.move(R(G.moves()));pz.rem--;last=[r.from,r.to];build();busy=false},450)}
 $('mb').onclick=back;
 $('bl').onclick=()=>{st.lang=st.lang=='en'?'ar':'en';save();render()};
+$('bm').onclick=()=>{st.music=!st.music;save();st.music?mu.play().catch(()=>{}):mu.pause();render()};
 render();
 </script>
 </body>
