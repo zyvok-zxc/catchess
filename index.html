@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cat Chess</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;font-family:'Courier New',monospace;color:#fff;text-align:center;background:#000}
+body{margin:0;min-height:100vh;overflow-x:hidden;font-family:'Courier New',monospace;color:#fff;text-align:center;background:#000}
 #bg{position:fixed;inset:0;z-index:0;background:#000 url('IMG_1692.jpeg') left center/cover no-repeat;image-rendering:pixelated}
 #bg::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.35)}
 #pieces{position:fixed;inset:0;z-index:1;overflow:hidden;pointer-events:none}
@@ -14,7 +14,7 @@ body{margin:0;min-height:100vh;font-family:'Courier New',monospace;color:#fff;te
 @keyframes rise{from{transform:translateY(0) rotate(0)}to{transform:translateY(-120vh) rotate(180deg)}}
 .content{position:relative;z-index:2;padding:30px 16px}
 .brand{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px}
-.brand img{width:90px;height:auto;background:#fff;border:4px solid #000;border-radius:14px;image-rendering:pixelated;animation:float 3s ease-in-out infinite}
+.brand img{width:90px;height:auto;background:#fff;border:4px solid #000;border-radius:14px;animation:float 3s ease-in-out infinite}
 .brand h1{font-size:2.2rem;margin:0;letter-spacing:3px;text-shadow:4px 4px 0 #ff1493}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .sub{color:#ddd;margin:0 0 32px}
@@ -41,7 +41,7 @@ body{margin:0;min-height:100vh;font-family:'Courier New',monospace;color:#fff;te
 
 <div id="start" onclick="startSite()">
   <img src="IMG_1690.jpeg" alt="Cat Chess logo">
-  <p>TAP TO START</p>
+  <p id="tap">TAP TO START</p>
 </div>
 
 <div class="content">
@@ -49,21 +49,34 @@ body{margin:0;min-height:100vh;font-family:'Courier New',monospace;color:#fff;te
     <img src="IMG_1690.jpeg" alt="logo">
     <h1>CAT CHESS</h1>
   </div>
-  <p class="sub">Chess, but with cats</p>
+  <p class="sub" id="sub">Chess, but with cats</p>
   <div class="menu">
-    <div class="card" onclick="beep(660,.1);alert('Puzzles are coming soon!')">
-      🧩 Puzzle Challenge<small>Easy, hard, or random puzzles</small>
+    <div class="card" onclick="go('puzzles.html')">
+      <span id="t1">🧩 Puzzle Challenge</span><small id="s1">Ladder, speed and character races</small>
     </div>
-    <div class="card" onclick="beep(740,.1);setTimeout(function(){location.href='cats.html'},150)">
-      😺 Play vs a Cat<small>Pick one of 15 characters</small>
+    <div class="card" onclick="go('cats.html')">
+      <span id="t2">😺 Play vs a Cat</span><small id="s2">Pick one of 25 characters</small>
     </div>
     <div class="card locked" onclick="beep(150,.25)">
-      🔒 Pixel Adventure<small>Under maintenance</small>
+      <span id="t3">🔒 Pixel Adventure</span><small id="s3">Under maintenance</small>
     </div>
   </div>
 </div>
 
 <script>
+const S=JSON.parse(localStorage.getItem('cc')||'{}');
+const ar=S.lang=='ar';
+if(ar){
+  document.documentElement.dir='rtl';
+  document.getElementById('tap').textContent='المس للبدء';
+  document.getElementById('sub').textContent='شطرنج، لكن مع القطط';
+  document.getElementById('t1').textContent='🧩 تحدي الألغاز';
+  document.getElementById('s1').textContent='سلّم، سرعة، وسباق مع الشخصيات';
+  document.getElementById('t2').textContent='😺 العب ضد قطة';
+  document.getElementById('s2').textContent='اختر من 25 شخصية';
+  document.getElementById('t3').textContent='🔒 المغامرة البكسلية';
+  document.getElementById('s3').textContent='تحت الصيانة';
+}
 let ctx;
 function beep(f,d){
   if(!ctx)return;
@@ -74,17 +87,21 @@ function beep(f,d){
   o.stop(ctx.currentTime+d);
 }
 const music=new Audio('glass_horizons.mp3');
-music.loop=true;music.volume=.5;
+music.loop=true;music.volume=.3;
 music.addEventListener('loadedmetadata',()=>{music.currentTime=+localStorage.getItem('cc_t')||0});
 setInterval(()=>{if(!music.paused)localStorage.setItem('cc_t',music.currentTime)},1000);
-window.addEventListener('pagehide',()=>localStorage.setItem('cc_t',music.currentTime));
 function startSite(){
   ctx=new (window.AudioContext||window.webkitAudioContext)();
   beep(523,.1);
   setTimeout(()=>beep(659,.1),110);
   setTimeout(()=>beep(784,.2),220);
-  music.play().catch(()=>{});
+  if(S.music!==false)music.play().catch(()=>{});
   document.getElementById('start').style.display='none';
+}
+function go(u){
+  beep(740,.1);
+  localStorage.setItem('cc_t',music.currentTime||0);
+  setTimeout(()=>{location.href=u},150);
 }
 const pieces=['♟','♞','♜','♛','♚','♝'];
 function spawnPiece(){
