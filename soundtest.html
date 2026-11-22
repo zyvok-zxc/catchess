@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sound test</title>
+<style>
+body{font-family:Arial,sans-serif;background:#111;color:#fff;padding:16px;text-align:center}
+button{font-size:1.1rem;padding:12px 16px;margin:6px;background:#173b2b;color:#b9f27a;border:3px solid #b9e769}
+pre{text-align:start;background:#000;padding:10px;white-space:pre-wrap;font-size:.9rem}
+</style>
+</head>
+<body>
+<h2>Sound test</h2>
+<button onclick="beep()">1. Test effect sound</button><br>
+<button onclick="song()">2. Test music file</button><br>
+<button onclick="checkFiles()">3. Check all song files</button><br>
+<button onclick="fix()">4. Reset sound settings</button>
+<pre id="o"></pre>
+<script>
+const o=document.getElementById('o');
+const log=x=>{o.textContent+=x+'\n'};
+log('Saved settings: '+(localStorage.getItem('cc')||'(none)'));
+let ac;
+function beep(){
+ try{
+  ac=ac||new(window.AudioContext||window.webkitAudioContext)();
+  ac.resume();
+  const a=ac.createOscillator(),g=ac.createGain();
+  a.type='square';a.frequency.value=660;g.gain.value=.2;
+  a.connect(g);g.connect(ac.destination);a.start();a.stop(ac.currentTime+.4);
+  log('Effect: played. Context state = '+ac.state+'. If you heard nothing, check the silent switch and the volume.')
+ }catch(e){log('Effect error: '+e)}}
+function song(){
+ const a=new Audio('glass_horizons.mp3');a.volume=1;
+ a.play().then(()=>log('Music: playing')).catch(e=>log('Music error: '+e.name+' - '+e.message))}
+function checkFiles(){
+ ['glass_horizons.mp3','cedar_and_morning_air.mp3','midnight_gambit.mp3','eight_squares_left.mp3','october_s_last_light.mp3','seven_rites_of_stone.mp3'].forEach(n=>{
+  fetch(n,{method:'HEAD'}).then(r=>log(n+': '+(r.ok?'OK':'MISSING')+' (status '+r.status+', size '+(r.headers.get('content-length')||'?')+')')).catch(e=>log(n+': error '+e))})}
+function fix(){
+ const s=JSON.parse(localStorage.getItem('cc')||'{}');
+ s.music=true;s.sfx=true;localStorage.setItem('cc',JSON.stringify(s));
+ log('Settings reset: music ON, effects ON. Saved settings now: '+localStorage.getItem('cc'))}
+</script>
+</body>
+</html>
