@@ -121,18 +121,36 @@ if(ar){
   document.getElementById('s3').textContent='تحت الصيانة';
 }
 
-/* removes the white background of the logo so it blends with the scene */
+/* removes the solid background of the logo (black or white): it reads the color from the 4 corners,
+   erases that color starting from the edges, and keeps a thin rim so the outline and inner lines stay */
 function clean(src,cb){
   const im=new Image();
   im.onload=()=>{
     try{
-      const k=Math.min(1,600/im.naturalWidth),c=document.createElement('canvas');
-      c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);
-      const x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);
-      const d=x.getImageData(0,0,c.width,c.height),p=d.data;
-      for(let i=0;i<p.length;i+=4){
-        const m=Math.min(p[i],p[i+1],p[i+2]);
-        if(m>=245)p[i+3]=0;else if(m>200)p[i+3]=Math.round((245-m)/45*255)}
+      const k=Math.min(1,600/im.naturalWidth),w=Math.round(im.naturalWidth*k),h=Math.round(im.naturalHeight*k);
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      const x=c.getContext('2d');x.drawImage(im,0,0,w,h);
+      const d=x.getImageData(0,0,w,h),p=d.data;
+      const cs=[0,w-1,(h-1)*w,h*w-1];
+      const bg=[0,1,2].map(j=>cs.reduce((a,i)=>a+p[i*4+j],0)/4);
+      const dist=i=>Math.hypot(p[i*4]-bg[0],p[i*4+1]-bg[1],p[i*4+2]-bg[2]);
+      const T=70,seen=new Uint8Array(w*h),stack=[];
+      const push=i=>{if(!seen[i]&&dist(i)<T){seen[i]=1;stack.push(i)}};
+      for(let a=0;a<w;a++){push(a);push((h-1)*w+a)}
+      for(let b=0;b<h;b++){push(b*w);push(b*w+w-1)}
+      while(stack.length){
+        const i=stack.pop(),cx=i%w,cy=(i/w)|0;
+        if(cx>0)push(i-1);if(cx<w-1)push(i+1);if(cy>0)push(i-w);if(cy<h-1)push(i+w)}
+      let keep=new Uint8Array(w*h);
+      for(let i=0;i<w*h;i++)keep[i]=seen[i]?0:1;
+      for(let r=0;r<4;r++){
+        const nk=keep.slice();
+        for(let i=0;i<w*h;i++){
+          if(keep[i])continue;
+          const cx=i%w,cy=(i/w)|0;
+          if((cx>0&&keep[i-1])||(cx<w-1&&keep[i+1])||(cy>0&&keep[i-w])||(cy<h-1&&keep[i+w]))nk[i]=1}
+        keep=nk}
+      for(let i=0;i<w*h;i++)p[i*4+3]=keep[i]?255:0;
       x.putImageData(d,0,0);cb(c.toDataURL('image/png'))
     }catch(e){cb(src)}
   };
