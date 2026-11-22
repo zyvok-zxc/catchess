@@ -4,61 +4,104 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cat Chess</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box}
-body{margin:0;min-height:100vh;overflow-x:hidden;font-family:'Courier New',monospace;color:#fff;text-align:center;background:#000}
-#bg{position:fixed;inset:0;z-index:0;background:#000 url('IMG_1692.jpeg') left center/cover no-repeat;image-rendering:pixelated}
-#bg::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.35)}
-#pieces{position:fixed;inset:0;z-index:1;overflow:hidden;pointer-events:none}
-.piece{position:absolute;bottom:-90px;color:#fff;opacity:.18;animation:rise linear forwards}
-@keyframes rise{from{transform:translateY(0) rotate(0)}to{transform:translateY(-120vh) rotate(180deg)}}
-.content{position:relative;z-index:2;padding:30px 16px}
-.brand{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:8px}
-.brand img{width:90px;height:auto;background:#fff;border:4px solid #000;border-radius:14px;animation:float 3s ease-in-out infinite}
-.brand h1{font-size:2.2rem;margin:0;letter-spacing:3px;text-shadow:4px 4px 0 #ff1493}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.sub{color:#ddd;margin:0 0 32px}
-.menu{display:flex;flex-direction:column;gap:18px;max-width:440px;margin:0 auto}
-.card{background:rgba(0,0,0,.75);border:4px solid #fff;box-shadow:6px 6px 0 #ff1493;padding:20px;font-size:1.3rem;font-weight:bold;cursor:pointer;transition:transform .12s,box-shadow .12s}
-.card small{display:block;margin-top:6px;font-size:.85rem;font-weight:normal;color:#ccc}
-.card:hover{transform:translate(-3px,-3px);box-shadow:10px 10px 0 #ff1493}
-.card:active{animation:pop .3s}
-.locked{border-color:#666;box-shadow:6px 6px 0 #333;color:#999;cursor:not-allowed}
-.locked:hover{transform:none;box-shadow:6px 6px 0 #333}
-.locked:active{animation:shake .3s}
-@keyframes pop{0%{transform:scale(1)}40%{transform:scale(.93)}100%{transform:scale(1)}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;overflow-x:hidden;font-family:Nunito,'Trebuchet MS',system-ui,sans-serif;color:#fff;text-align:center;background:#0d0714}
+#bgv{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;background:#0d0714}
+#shade{position:fixed;inset:0;z-index:0;background:linear-gradient(rgba(10,5,20,.35),rgba(10,5,20,.2) 50%,rgba(10,5,20,.45))}
+.sw{position:fixed;z-index:1;width:min(30vw,260px);pointer-events:none}
+.sw.tl{left:0;top:0}
+.sw.br{right:0;bottom:0;transform:rotate(180deg)}
+.dots{position:fixed;z-index:1;width:min(14vw,90px);aspect-ratio:1;pointer-events:none;background:radial-gradient(#ff1493 2px,transparent 2.6px) 0 0/10px 10px,rgba(40,10,30,.7)}
+.dots.tl{left:4vw;top:min(16vw,110px)}
+.dots.tr{right:3vw;top:3vw}
+.dots.bl{left:3vw;bottom:3vw}
+.dots.br{right:4vw;bottom:min(14vw,90px)}
+.sp{position:fixed;z-index:1;color:#ff2d9a;font-size:34px;text-shadow:0 0 12px #ff1493;pointer-events:none}
+.s1{left:4vw;top:50vh}.s2{right:12vw;bottom:16vh}
+.paw{position:fixed;z-index:1;width:58px;fill:#ff2d9a;filter:drop-shadow(0 0 8px #ff1493);pointer-events:none}
+.p1{right:5vw;top:52vh;transform:rotate(15deg)}
+.p2{right:3vw;top:66vh;transform:rotate(-15deg);width:74px}
+.bigcat{position:fixed;left:-26px;bottom:-34px;width:min(52vw,380px);z-index:1;pointer-events:none}
+.burst{position:absolute;width:48px;pointer-events:none}
+.b1{right:-36px;top:-24px}
+.b2{position:fixed;left:min(30vw,230px);bottom:min(34vw,240px);z-index:1;width:56px}
+.lg{visibility:hidden}
+.content{position:relative;z-index:2;max-width:640px;margin:auto;padding:30px 16px 150px}
+.brand{direction:ltr;display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:34px}
+.brand img{width:clamp(90px,24vw,170px);height:auto}
+.vl{width:3px;align-self:stretch;background:linear-gradient(transparent,#ff2d9a,transparent)}
+.title{font-weight:900;font-size:clamp(2rem,9vw,3.4rem);letter-spacing:1px;line-height:1;text-align:start}
+.title span{color:#fff}.title i{color:#ff2d9a;font-style:normal}
+.tag{font-size:clamp(.85rem,3.2vw,1.1rem);color:#ddd;margin-top:6px;text-align:center}
+.menu{display:flex;flex-direction:column;gap:20px}
+.btn{position:relative;display:flex;align-items:center;gap:18px;padding:18px 22px;border-radius:26px;background:rgba(15,10,25,.8);border:3px solid #8a8a96;cursor:pointer;text-align:start;transition:transform .12s}
+.btn:active{transform:scale(.97)}
+.btn.hot{border-color:#ff2d9a;box-shadow:0 0 18px #ff1493,0 0 42px rgba(255,20,147,.45),inset 0 0 14px rgba(255,20,147,.35)}
+.btn svg.ic{width:56px;height:56px;flex:none}
+.btn b{display:block;font-weight:800;font-size:clamp(1.15rem,4.6vw,1.6rem)}
+.btn small{display:block;color:#b9b9c6;font-size:clamp(.8rem,3.2vw,1.05rem);margin-top:2px}
+.ch{margin-inline-start:auto;font-size:2rem;color:#fff;line-height:1}
+[dir=rtl] .ch{transform:scaleX(-1)}
+.btn.lock{color:#9a9aa6;cursor:not-allowed;overflow:hidden}
+.btn.lock .ch{color:#777}
+.btn.lock::after{content:"";position:absolute;right:10px;bottom:6px;width:90px;height:14px;background:repeating-linear-gradient(-45deg,#777 0 8px,transparent 8px 16px);opacity:.6}
+.btn.lock:active{animation:shake .3s}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
-#start{position:fixed;inset:0;z-index:10;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;cursor:pointer}
-#start img{width:150px;background:#fff;border:5px solid #000;border-radius:18px;animation:float 3s ease-in-out infinite}
-#start p{font-size:1.4rem;animation:blink 1s steps(2) infinite}
-@keyframes blink{50%{opacity:0}}
+#start{position:fixed;inset:0;z-index:10;background:rgba(10,5,20,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;cursor:pointer}
+#start img{width:200px;max-width:50vw}
+#start p{font-size:1.5rem;font-weight:800;color:#ff2d9a;text-shadow:0 0 12px #ff1493;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.2}}
 </style>
 </head>
 <body>
 
-<div id="bg"></div>
-<div id="pieces"></div>
+<video id="bgv" autoplay muted loop playsinline webkit-playsinline preload="auto" poster="IMG_1692.jpeg">
+  <source src="upaikaray_pindown.io_1795350823.mp4" type="video/mp4">
+</video>
+<div id="shade"></div>
+
+<svg class="sw tl" viewBox="0 0 260 160"><path d="M0 0H210C170 28 120 70 70 100 40 118 18 140 0 160Z" fill="#ff1493"/><path d="M0 0H178C140 24 96 58 52 86 30 100 12 116 0 132Z" fill="#0d0714"/></svg>
+<svg class="sw br" viewBox="0 0 260 160"><path d="M0 0H210C170 28 120 70 70 100 40 118 18 140 0 160Z" fill="#ff1493"/><path d="M0 0H178C140 24 96 58 52 86 30 100 12 116 0 132Z" fill="#0d0714"/></svg>
+<div class="dots tl"></div><div class="dots tr"></div><div class="dots bl"></div><div class="dots br"></div>
+<span class="sp s1">✦</span><span class="sp s2">✦</span>
+<svg class="paw p1" viewBox="0 0 64 64"><ellipse cx="14" cy="28" rx="7" ry="9"/><ellipse cx="27" cy="16" rx="7" ry="9"/><ellipse cx="41" cy="16" rx="7" ry="9"/><ellipse cx="53" cy="28" rx="7" ry="9"/><path d="M32 30c-10 0-18 9-18 17 0 6 5 9 10 8 4-1 5-2 8-2s4 1 8 2c5 1 10-2 10-8 0-8-8-17-18-17z"/></svg>
+<svg class="paw p2" viewBox="0 0 64 64"><ellipse cx="14" cy="28" rx="7" ry="9"/><ellipse cx="27" cy="16" rx="7" ry="9"/><ellipse cx="41" cy="16" rx="7" ry="9"/><ellipse cx="53" cy="28" rx="7" ry="9"/><path d="M32 30c-10 0-18 9-18 17 0 6 5 9 10 8 4-1 5-2 8-2s4 1 8 2c5 1 10-2 10-8 0-8-8-17-18-17z"/></svg>
+<img class="lg bigcat" src="IMG_1785.jpeg" alt="">
+<svg class="burst b2" viewBox="0 0 50 40"><path d="M6 36l10-24M22 38l6-30M40 32l-6-24" stroke="#ff1493" stroke-width="6" stroke-linecap="round" fill="none"/></svg>
 
 <div id="start" onclick="startSite()">
-  <img src="IMG_1690.jpeg" alt="Cat Chess logo">
+  <img class="lg" src="IMG_1785.jpeg" alt="Cat Chess">
   <p id="tap">TAP TO START</p>
 </div>
 
 <div class="content">
   <div class="brand">
-    <img src="IMG_1690.jpeg" alt="logo">
-    <h1>CAT CHESS</h1>
+    <img class="lg" src="IMG_1785.jpeg" alt="logo">
+    <div class="vl"></div>
+    <div>
+      <div class="title"><span>CAT</span> <i>CHESS</i></div>
+      <div class="tag" id="sub">— Chess, but with cats —</div>
+    </div>
   </div>
-  <p class="sub" id="sub">Chess, but with cats</p>
+
   <div class="menu">
-    <div class="card" onclick="go('puzzles.html')">
-      <span id="t1">🧩 Puzzle Challenge</span><small id="s1">Ladder, speed and character races</small>
+    <div class="btn hot" onclick="go('puzzles.html')">
+      <svg class="burst b1" viewBox="0 0 50 40"><path d="M6 6l12 8M22 2l4 14M40 8l-10 10" stroke="#ff1493" stroke-width="6" stroke-linecap="round" fill="none"/></svg>
+      <svg class="ic" viewBox="0 0 64 64"><path d="M12 20h12c0-6 4-10 8-10s8 4 8 10h12v14c6 0 10 4 10 8s-4 8-10 8v12H12V20z" fill="#ff5fb0"/></svg>
+      <div><b id="t1">Puzzle Challenge</b><small id="s1">Ladder, speed races and secret files</small></div>
+      <span class="ch">›</span>
     </div>
-    <div class="card" onclick="go('cats.html')">
-      <span id="t2">😺 Play vs a Cat</span><small id="s2">Pick one of 25 characters</small>
+    <div class="btn" onclick="go('cats.html')">
+      <svg class="ic" viewBox="0 0 64 64"><path d="M10 10l13 11h18l13-11v28c0 10-10 16-22 16S10 48 10 38z" fill="#eee"/><circle cx="24" cy="36" r="3" fill="#222"/><circle cx="40" cy="36" r="3" fill="#222"/><path d="M28 43q4 4 8 0" stroke="#222" fill="none" stroke-width="2"/></svg>
+      <div><b id="t2">Play vs a Cat</b><small id="s2">Pick one of 25 characters</small></div>
+      <span class="ch">›</span>
     </div>
-    <div class="card locked" onclick="beep(150,.25)">
-      <span id="t3">🔒 Pixel Adventure</span><small id="s3">Under maintenance</small>
+    <div class="btn lock" onclick="beep(150,.25)">
+      <svg class="ic" viewBox="0 0 64 64"><rect x="14" y="28" width="36" height="28" rx="4" fill="#8a8a96"/><path d="M21 28v-8a11 11 0 0 1 22 0v8" stroke="#8a8a96" stroke-width="6" fill="none"/><circle cx="32" cy="42" r="4" fill="#2a2a33"/></svg>
+      <div><b id="t3">Pixel Adventure</b><small id="s3">Under maintenance</small></div>
+      <span class="ch">›</span>
     </div>
   </div>
 </div>
@@ -69,14 +112,34 @@ const ar=S.lang=='ar';
 if(ar){
   document.documentElement.dir='rtl';
   document.getElementById('tap').textContent='المس للبدء';
-  document.getElementById('sub').textContent='شطرنج، لكن مع القطط';
-  document.getElementById('t1').textContent='🧩 تحدي الألغاز';
-  document.getElementById('s1').textContent='سلّم، سرعة، وسباق مع الشخصيات';
-  document.getElementById('t2').textContent='😺 العب ضد قطة';
+  document.getElementById('sub').textContent='— شطرنج، لكن مع القطط —';
+  document.getElementById('t1').textContent='تحدي الألغاز';
+  document.getElementById('s1').textContent='سلّم، سباقات سرعة، وملفات سرية';
+  document.getElementById('t2').textContent='العب ضد قطة';
   document.getElementById('s2').textContent='اختر من 25 شخصية';
-  document.getElementById('t3').textContent='🔒 المغامرة البكسلية';
+  document.getElementById('t3').textContent='المغامرة البكسلية';
   document.getElementById('s3').textContent='تحت الصيانة';
 }
+
+/* removes the white background of the logo so it blends with the scene */
+function clean(src,cb){
+  const im=new Image();
+  im.onload=()=>{
+    try{
+      const k=Math.min(1,600/im.naturalWidth),c=document.createElement('canvas');
+      c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);
+      const x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);
+      const d=x.getImageData(0,0,c.width,c.height),p=d.data;
+      for(let i=0;i<p.length;i+=4){
+        const m=Math.min(p[i],p[i+1],p[i+2]);
+        if(m>=245)p[i+3]=0;else if(m>200)p[i+3]=Math.round((245-m)/45*255)}
+      x.putImageData(d,0,0);cb(c.toDataURL('image/png'))
+    }catch(e){cb(src)}
+  };
+  im.onerror=()=>cb(src);
+  im.src=src}
+clean('IMG_1785.jpeg',u=>{document.querySelectorAll('.lg').forEach(e=>{e.src=u;e.style.visibility='visible'})});
+
 let ctx;
 function beep(f,d){
   if(!ctx)return;
@@ -90,12 +153,15 @@ const music=new Audio('glass_horizons.mp3');
 music.loop=true;music.volume=.3;
 music.addEventListener('loadedmetadata',()=>{music.currentTime=+localStorage.getItem('cc_t')||0});
 setInterval(()=>{if(!music.paused)localStorage.setItem('cc_t',music.currentTime)},1000);
+const bgv=document.getElementById('bgv');
+bgv.play().catch(()=>{});
 function startSite(){
   ctx=new (window.AudioContext||window.webkitAudioContext)();
   beep(523,.1);
   setTimeout(()=>beep(659,.1),110);
   setTimeout(()=>beep(784,.2),220);
   if(S.music!==false)music.play().catch(()=>{});
+  bgv.play().catch(()=>{});
   document.getElementById('start').style.display='none';
 }
 function go(u){
@@ -103,20 +169,6 @@ function go(u){
   localStorage.setItem('cc_t',music.currentTime||0);
   setTimeout(()=>{location.href=u},150);
 }
-const pieces=['♟','♞','♜','♛','♚','♝'];
-function spawnPiece(){
-  const p=document.createElement('div');
-  p.className='piece';
-  p.textContent=pieces[Math.floor(Math.random()*6)]+'\uFE0E';
-  p.style.left=Math.random()*95+'%';
-  p.style.fontSize=(30+Math.random()*40)+'px';
-  const dur=18+Math.random()*14;
-  p.style.animationDuration=dur+'s';
-  document.getElementById('pieces').appendChild(p);
-  setTimeout(()=>p.remove(),dur*1000);
-}
-for(let i=0;i<5;i++)spawnPiece();
-setInterval(spawnPiece,3000);
 </script>
 
 </body>
