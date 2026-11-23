@@ -3,62 +3,99 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cat Chess - Pixel Adventure</title>
+<title>Cat Chess - Cursed Chess Castle</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;min-height:100vh;background:#120a24;color:#fff;font-family:'Press Start 2P','Courier New',monospace;text-align:center}
-#stars{position:fixed;inset:0;z-index:-1;background:radial-gradient(#fff 1px,transparent 1.5px) 0 0/40px 40px,radial-gradient(#ff77c8 1px,transparent 1.5px) 20px 20px/60px 60px,#120a24}
-.w{max-width:560px;margin:auto;padding:14px 10px}
-.bar{display:flex;justify-content:space-between;align-items:center}
-.pb{display:inline-block;font:inherit;font-size:.65rem;color:#fff;background:#3b1f7a;border:4px solid #ff77c8;box-shadow:4px 4px 0 #000;padding:12px 14px;margin:8px;cursor:pointer;text-decoration:none}
-.pb:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
-h1{font-size:1.1rem;color:#ffd60a;text-shadow:3px 3px 0 #ff1493;line-height:1.5}
-.panel{background:#24123f;border:4px solid #ff77c8;box-shadow:6px 6px 0 #000;padding:12px;margin:10px 0;font-size:.6rem;line-height:1.9;text-align:start}
-.px{image-rendering:pixelated}
-#grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0}
-.nd{aspect-ratio:1;position:relative;background:#3b1f7a;border:4px solid #8a6ad8;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;overflow:hidden}
-.nd img{width:100%;height:100%;object-fit:cover}
-.nd b{position:absolute;top:0;left:0;background:#000;font-size:.45rem;padding:2px 4px;font-weight:normal;z-index:1}
-.nd.cl{border-color:#4ade80}
-.nd.cur{border-color:#ffd60a;animation:bl 1s steps(2) infinite}
-.nd.lk{opacity:.5;cursor:not-allowed}
-@keyframes bl{50%{border-color:#fff}}
-img.big{width:min(60vw,220px);height:auto;background:#fff;border:4px solid #000;margin:8px auto;display:block}
-.top{display:flex;gap:10px;align-items:center}
-.top img{width:72px;height:72px;object-fit:cover;background:#fff;border:4px solid #000;flex:none}
-.top .panel{flex:1;margin:0}
-#bd{direction:ltr;position:relative;width:min(96vw,480px);aspect-ratio:1;margin:10px auto;border:4px solid #ff77c8;user-select:none}
-.sq{position:absolute;width:12.5%;height:12.5%;display:flex;align-items:center;justify-content:center}
-.sq.l{box-shadow:inset 0 0 0 100px rgba(255,235,59,.4)}
-.sq.s{box-shadow:inset 0 0 0 100px rgba(255,235,59,.7)}
-.sq.d::after{content:"";position:absolute;inset:38%;background:rgba(0,0,0,.45)}
+body{margin:0;min-height:100vh;background:#0b0614;color:#f1e9ff;font-family:Cairo,system-ui,sans-serif;text-align:center}
+#bgx{position:fixed;inset:0;z-index:-1;background:url(adv_bg.jpeg) center/cover,radial-gradient(ellipse at 50% 15%,rgba(140,80,255,.4),transparent 60%),#0b0614}
+.w{max-width:1000px;margin:auto;padding:10px}
+#top{display:flex;justify-content:space-between;align-items:center}
+.btn{font:700 1rem Cairo,sans-serif;color:#f1e9ff;background:rgba(20,10,34,.92);border:2px solid #b8a2e8;border-radius:10px;padding:10px 16px;cursor:pointer;margin:4px;text-decoration:none}
+.btn.gold{border-color:#e0b85c;box-shadow:0 0 12px rgba(224,184,92,.5)}
+.btn:disabled{opacity:.35}
+.pn2{background:rgba(14,8,24,.86);border:2px solid #9b82d6;border-radius:10px;padding:8px 12px;box-shadow:0 0 14px rgba(150,100,255,.35),inset 0 0 8px rgba(0,0,0,.6);text-align:start}
+.pn2.on{border-color:#e0b85c;box-shadow:0 0 16px rgba(224,184,92,.6)}
+h1{font-size:1.5rem;margin:6px 0;color:#e8d9ff;text-shadow:0 0 14px #8a5cff}
+#mapw{position:relative;width:min(98vw,960px);aspect-ratio:3/2;margin:8px auto;border:10px solid #cdb88f;border-radius:14px;box-shadow:0 0 0 3px #4a3a22,inset 0 0 40px rgba(0,0,0,.6);background:url(adv_map.jpeg) center/cover,radial-gradient(circle at 30% 25%,#6a5a9a,#2b2147 65%);overflow:hidden}
+.rt{position:absolute;inset:0;width:100%;height:100%}
+.ttl{position:absolute;left:2%;top:3%;background:rgba(14,8,24,.92);border:2px solid #cdb88f;border-radius:10px;padding:6px 14px;font-weight:900;font-size:clamp(.7rem,2.6vw,1.3rem)}
+.cmp{position:absolute;right:3%;top:3%;width:clamp(36px,9vw,80px);opacity:.85}
+.nd{position:absolute;transform:translate(-50%,-50%);width:clamp(90px,17vw,150px)}
+.nd .bp{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);height:clamp(60px,15vw,135px);max-width:200%;object-fit:contain;filter:drop-shadow(0 4px 6px #000)}
+.nd.lk .bp{filter:brightness(0)}
+.nd.cu .bp{filter:drop-shadow(0 0 12px #e0b85c)}
+.qm{position:absolute;bottom:130%;left:50%;transform:translateX(-50%);font-size:clamp(1.6rem,6vw,3rem);font-weight:900;color:#c9a4ff;text-shadow:0 0 14px #8a5cff}
+.pl{background:rgba(14,8,24,.92);border:2px solid #cdb88f;border-radius:8px;padding:4px 6px;line-height:1.2}
+.pl b{display:block;font-size:clamp(.65rem,2vw,.95rem)}
+.pl small{display:block;font-size:clamp(.55rem,1.6vw,.75rem);color:#d8c9f5}
+.nd.cu .pl{border-color:#e0b85c;box-shadow:0 0 14px #e0b85c;animation:bl 1.2s infinite}
+.nd.cl .pl{border-color:#5ee08a}
+.nd.lk{opacity:.7;cursor:not-allowed}
+.pwn{display:inline-block;width:20px;height:20px;border-radius:50%;background:#7b4bd6;vertical-align:middle;margin-bottom:2px}
+.pwn svg{width:100%;height:100%;fill:#fff}
+.cas{font-size:clamp(1.8rem,7vw,3.4rem);display:block}
+@keyframes bl{50%{box-shadow:0 0 4px #e0b85c}}
+img.big{height:min(40vh,320px);max-width:92%;object-fit:contain;filter:drop-shadow(0 0 20px #8a5cff)}
+.rk{display:inline-block;font-size:2.2rem;font-weight:900;color:#e0b85c;border:3px solid #e0b85c;border-radius:50%;width:70px;height:70px;line-height:64px;margin-bottom:6px;text-align:center}
+#fight{display:none}
+.fg{display:grid;gap:8px;grid-template-columns:1fr;grid-template-areas:"hdr" "bpic" "stbox" "bwr" "me" "en" "ab" "bts"}
+@media(min-width:900px){.fg{grid-template-columns:250px minmax(0,500px) 250px;justify-content:center;grid-template-areas:"hdr bpic en" "stbox bpic ab" "me bwr ab" "bts bwr ."}}
+#hdr{grid-area:hdr}#stbox{grid-area:stbox}#bpic{grid-area:bpic;display:flex;justify-content:center;align-items:flex-end}#bwr{grid-area:bwr;perspective:900px}#me{grid-area:me;display:flex;gap:10px;align-items:center}#en{grid-area:en}#ab{grid-area:ab}#bts{grid-area:bts}
+#bpic img{height:min(26vh,230px);max-width:100%;object-fit:contain;filter:drop-shadow(0 0 18px #8a5cff)}
+.hr{display:flex;align-items:center;gap:8px}.hr .btn{padding:4px 10px;margin:2px}
+.hpb{position:relative;height:20px;background:#1b0f2e;border:2px solid #9b82d6;border-radius:4px;margin-top:6px;overflow:hidden}
+.hpb i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(#b07bff,#6a3bd6);width:100%;transition:width .4s}
+.hpb span{position:absolute;inset:0;font-size:.75rem;line-height:16px;text-align:center}
+#pimg{width:70px;height:70px;object-fit:contain;flex:none}
+#bd{position:relative;width:100%;aspect-ratio:1;transform:rotateX(24deg);transform-style:preserve-3d;border:4px solid #6b4c9a;box-shadow:0 18px 36px rgba(0,0,0,.7);user-select:none}
+.sq{position:absolute;width:12.5%;height:12.5%;display:flex;align-items:center;justify-content:center;font-size:min(9vw,48px);line-height:1}
+.sq span{transform:rotateX(-24deg) translateY(-8%);pointer-events:none}
+.sq.l{box-shadow:inset 0 0 0 100px rgba(255,214,10,.4)}
+.sq.s{box-shadow:inset 0 0 0 100px rgba(255,214,10,.7)}
+.sq.d::after{content:"";position:absolute;inset:36%;border-radius:50%;background:rgba(140,80,255,.7)}
+.sq.c{box-shadow:inset 0 0 0 4px #c9a4ff}
+.pw{color:#fff;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
+.pb{color:#111;text-shadow:0 0 2px #fff,0 0 2px #fff}
+#res{display:none;position:fixed;inset:0;background:rgba(5,2,12,.88);z-index:50;align-items:center;justify-content:center;flex-direction:column;padding:20px}
+#rt1{font-size:1.4rem;font-weight:900;margin-bottom:14px;max-width:520px}
 </style>
 </head>
 <body>
-<div id="stars"></div>
+<div id="bgx"></div>
 <div class="w">
-  <div class="bar"><a id="bk" class="pb" href="index.html" style="margin:0"></a><button id="bl" class="pb" style="margin:0"></button></div>
-  <h1 id="h"></h1>
+  <div id="top"><a id="bk" class="btn" href="index.html"></a><button id="bl" class="btn"></button></div>
 
-  <div id="intro" class="scr"><div class="panel" id="story"></div><button class="pb" id="go"></button></div>
+  <div id="intro" class="scr"><h1 id="h"></h1><div class="pn2" id="story" style="min-height:90px;margin:14px 0;line-height:1.9"></div><button class="btn gold" id="go"></button></div>
 
-  <div id="map" class="scr" style="display:none"><div class="panel" id="prog"></div><div id="grid"></div></div>
+  <div id="map" class="scr" style="display:none"><div id="mapw"></div></div>
 
   <div id="boss" class="scr" style="display:none">
-    <img id="bimg" class="px big">
-    <div class="panel" id="binfo"></div>
-    <button class="pb" id="fb"></button><button class="pb" id="mb1"></button>
+    <img id="bimg" class="big">
+    <div class="pn2" id="binfo" style="line-height:1.9;margin:8px 0"></div>
+    <button class="btn gold" id="fb"></button><button class="btn" id="mb1"></button>
   </div>
 
-  <div id="fight" class="scr" style="display:none">
-    <div class="top"><img id="fimg" class="px"><div class="panel" id="talk"></div></div>
-    <div id="bd"></div>
-    <div class="panel" id="msg"></div>
-    <button class="pb" id="rt"></button>
+  <div id="fight" class="scr">
+   <div class="fg">
+    <div id="hdr" class="pn2">
+      <div class="hr"><span class="pwn" style="width:30px;height:30px"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3.5"/><path d="M9 12h6l1 5H8zM6 20h12v2H6z"/></svg></span><div style="flex:1"><b id="fst"></b><br><span id="fnm"></span></div><button class="btn" id="gb">⚙</button><button class="btn" id="xb">⎋</button></div>
+      <div class="hpb"><i id="hpf"></i><span id="hpt"></span></div>
+      <div id="bclk" style="margin-top:4px"></div>
+    </div>
+    <div id="stbox" class="pn2"></div>
+    <div id="bpic"><img id="fimg"></div>
+    <div id="bwr"><div id="bd"></div></div>
+    <div id="me" class="pn2"><img id="pimg"><div><b id="mt1"></b><div id="mt2" style="font-size:.85rem"></div><div id="pclk" style="font-size:1.2rem;font-weight:900"></div></div></div>
+    <div id="en" class="pn2"><b id="et1"></b><div id="et2" style="font-size:.85rem"></div></div>
+    <div id="ab" class="pn2"><b id="at1"></b><div id="at2" style="font-weight:900;margin-top:4px"></div><div id="at3" style="font-size:.85rem"></div></div>
+    <div id="bts"><button class="btn" id="sur"></button><button class="btn" id="und"></button><button class="btn gold" id="endt"></button></div>
+   </div>
   </div>
 </div>
+
+<div id="res"><div id="rt1"></div><div><button class="btn gold" id="rr"></button><button class="btn" id="rm"></button></div></div>
 
 <script>
 const $=id=>document.getElementById(id);
@@ -68,44 +105,62 @@ const st={lang:S.lang||'en',music:S.music!==false,sfx:S.sfx!==false};
 const save=()=>localStorage.setItem('cc',JSON.stringify(Object.assign(JSON.parse(localStorage.getItem('cc')||'{}'),st)));
 const L=x=>x[st.lang=='ar'?1:0];
 const T={
- title:['PIXEL ADVENTURE','المغامرة البكسلية'],back:['< BACK','رجوع >'],
- start:['START','ابدأ'],map:['MAP','الخريطة'],fight:['FIGHT!','قاتل!'],
- story:['Your little brother was taken by the Count of the Board, Dracula. Fifteen guardians hold the road to his castle. Beat each one at chess, find your brother, and bring him home.','أخوك الصغير أخذه كونت الرقعة، دراكولا. خمسة عشر حارساً يسدّون الطريق لقلعته. اهزم كل واحد منهم في الشطرنج، وجد أخوك، وارجع به للبيت.'],
- end:['Dracula falls. Your brother runs into your paws. The road is closed... for now. THE END.','سقط دراكولا. ركض أخوك إلى حضنك. أُغلق الطريق... مؤقتاً. النهاية.'],
- prog:['Bosses defeated','البوسات المهزومة'],rating:['RATING','التصنيف'],style:['STYLE','الأسلوب'],
- open:['OPENING','الافتتاحية'],weak:['WEAKNESS','نقطة الضعف'],
- wild:['Chaotic','فوضوي'],greedy:['Greedy','طماع'],solid:['Solid','متماسك'],
- win:['BOSS DEFEATED! The road opens.','هزمت البوس! انفتح الطريق.'],lose:['You lost. Try again!','خسرت. حاول مرة ثانية!'],draw:['Draw. Try again!','تعادل. حاول مرة ثانية!'],
- your:['Your move (White)','دورك (الأبيض)'],unk:['????','????']};
+ title:['CURSED CHESS CASTLE','قلعة الشطرنج الملعونة'],back:['← Back','رجوع →'],start:['START','ابدأ'],map:['MAP','الخريطة'],fight:['FIGHT!','قاتل!'],
+ story:['Lucian Dracula holds your little brother in his castle. Six guardians block the road through the Cursed Chess Kingdom. Beat them all, face Lucian, and bring your brother home.','لوسيان دراكولا يحتجز أخاك الصغير في قلعته. ستة حراس يسدّون الطريق في مملكة الشطرنج الملعونة. اهزمهم جميعاً، وواجه لوسيان، وأعد أخاك إلى البيت.'],
+ end:['Lucian lowers his head. "Your brother is safe. I only needed to know who was coming for him. The reason... is a story for another night." TO BE CONTINUED.','خفض لوسيان رأسه. «أخوك بخير. كنت أحتاج فقط أن أعرف من الذي يأتي من أجله. أما السبب… فهو حكاية لليلة أخرى.» يتبع…'],
+ begin:['Start','البداية'],yourT:['Your turn','دورك'],mv1:['Move a piece, then end your turn.','حرّك قطعة ثم أنهِ الدور.'],mv2:['Press End turn to confirm.','اضغط إنهاء الدور للتأكيد.'],
+ enT:['Enemy turn','دور العدو'],en1:['The enemy is thinking...','العدو يفكر...'],en2:['Waiting...','بانتظار الدور...'],
+ abil:['Boss abilities','قدرات الزعيم'],endT:['End turn','إنهاء الدور'],undo:['Undo','تراجع'],sur:['Surrender','الاستسلام'],
+ win:['VICTORY! The road opens.','انتصار! انفتح الطريق.'],lose:['DEFEAT.','هزيمة.'],draw:['Draw.','تعادل.'],
+ tw:['The boss ran out of time!','انتهى وقت الزعيم!'],tl:['You ran out of time!','انتهى وقتك!'],
+ retry:['Try again','حاول مرة ثانية'],cont:['Continue','تابع'],diff:['Difficulty','الصعوبة'],time:['Time each','وقت كل طرف'],weak:['Weakness','نقطة الضعف']};
 const t=k=>L(T[k]);
-
-/* the 15 bosses: e = engine strength, s = style, op = the black moves he likes to open with */
-const B=[
-{n:'Stupi',i:'IMG_1748.jpeg',e:200,r:'200',s:'wild',o:"Grob's Attack",op:['a5','h5'],h:['Moves almost at random. Do not blunder and he falls.','يتحرك شبه عشوائي. لا تخطئ وهو يسقط.'],l:['Beep! Hello! Who are you?','هلااا! من أنت؟']},
-{n:'The Ghost Cat',i:'IMG_1707.png',e:700,r:'700',s:'wild',o:'Spooky Opening',op:['e5'],h:['Moves wildly. Punish loose pieces.','يتحرك بجنون. عاقب القطع المكشوفة.'],l:['Boo! Can you see me?','بووو! هل تراني؟']},
-{n:'Cat 67',i:'IMG_1703.png',e:900,r:'900',s:'wild',o:'The 67 Opening',op:['b6','Bb7'],h:['Chaotic and weak. Keep your king safe.','فوضوي وضعيف. احمِ ملكك.'],l:['67 67 67! Let us play!','67 67 67! لنلعب!']},
-{n:'Pumpkin Kid',i:'IMG_1746.jpeg',e:1200,r:'1200',s:'wild',o:'Four Knights',op:['e5','Nc6','Nf6'],h:['Nervous. He drops pieces under pressure.','متوتر. يضيّع القطع تحت الضغط.'],l:['P-please be gentle...','أ-أرجوك كن لطيفاً...']},
-{n:'Fish Cat',i:'IMG_1768.jpeg',e:1567,r:'1567',s:'greedy',o:'Great Fish Opening',op:['e5'],h:['Grabs any piece he can. Offer him nothing.','يأكل أي قطعة يقدر عليها. لا تعطه شي.'],l:['Meow! Fish?','مياو! سمك؟']},
-{n:'Jimmy',i:'IMG_1750.jpeg',e:1600,r:'1600',s:'solid',o:'Italian Game',op:['e5','Nc6','Bc5'],h:['Solid but simple. Develop your pieces fast.','متماسك لكن بسيط. طوّر قطعك بسرعة.'],l:['Ready? Let us go!','جاهز؟ يلا!']},
-{n:'The Musical Cat',i:'IMG_1706.png',e:1700,r:'1700',s:'solid',o:'The Quiet Fugue',op:['d5','e6'],h:['Calm and careful. Do not rush.','هادئ وحذر. لا تستعجل.'],l:['Hm. Let the music begin.','همم. لتبدأ الموسيقى.']},
-{n:'The Wizard',i:'IMG_1755.jpeg',e:1800,r:'1800',s:'solid',o:'Ruy Lopez',op:['e5','Nc6','a6'],h:['Loves tricks. Watch every check.','يحب الحيل. انتبه لكل كش.'],l:['Behold my magic!','شاهد سحري!']},
-{n:'Green Coat Girl',i:'IMG_1749.jpeg',e:1987,r:'1987',s:'solid',o:'London System',op:['d5','Nf6','e6'],h:['Peaceful but accurate. Trade pieces carefully.','هادئة لكنها دقيقة. بدّل القطع بحذر.'],l:['I hope it is a lovely game.','أتمنى أن تكون مباراة جميلة.']},
-{n:'Amelia',i:'IMG_1747.jpeg',e:2000,r:'2000',s:'greedy',o:"King's Gambit",op:['e5','Nf6'],h:['Greedy for captures. Set traps with bait.','طماعة في الأكل. انصب لها فخاً بطُعم.'],l:['Let us smash this board!','لنحطم هذه الرقعة!']},
-{n:'Om',i:'IMG_1745.jpeg',e:2100,r:'2100',s:'solid',o:'Italian Game',op:['e5','Nc6','Nf6'],h:['Suspicious and sharp. Avoid risky ideas.','شكاك وحاد. تجنب الأفكار الخطرة.'],l:['I sense a trap...','أشعر أن هناك فخاً...']},
-{n:'Al-Jameel',i:'IMG_1765.jpeg',e:2450,r:'2450',s:'solid',o:"King's Indian",op:['Nf6','g6','Bg7','d6'],h:['Strong and proud. He bends but rarely breaks.','قوي ومغرور. ينحني لكن نادراً ينكسر.'],l:['You may admire me now.','تقدر تعجب بي الحين.']},
-{n:'Clown Cat',i:'IMG_1769.jpeg',e:2670,r:'2670',s:'greedy',o:'Sicilian Dragon',op:['c5','g6','Bg7'],h:['Greedy and tricky. Count every sacrifice.','طماع وماكر. احسب كل تضحية.'],l:['Do not turn around...','لا تلتفت...']},
-{n:'The Obsessed Cat',i:'IMG_1705.png',e:3000,r:'3000',s:'solid',o:'Slav Defense',op:['d5','c6','Nf6'],h:['Near perfect. Only precision will do.','شبه مثالي. الدقة وحدها تنفع.'],l:['Do not embarrass yourself.','لا تحرج نفسك.']},
-{n:'Dracula',i:'IMG_1775.jpeg',e:3200,r:'????',s:'solid',o:'Sicilian Dragon',op:['c5','d6','Nf6','g6'],h:['The Count of the Board. No weakness is known.','كونت الرقعة. ما أحد يعرف له نقطة ضعف.'],l:['Another visitor. How tiresome.','زائر آخر. كم هذا ممل.']}];
+const ST=[['Stage 1','المرحلة الأولى'],['Stage 2','المرحلة الثانية'],['Stage 3','المرحلة الثالثة'],['Stage 4','المرحلة الرابعة'],['Stage 5','المرحلة الخامسة'],['Final Stage','المرحلة الأخيرة']];
+/* the six bosses: e = how well he plays, s = his style, time shrinks and he moves faster with every stage */
+const BS=[
+{i:'IMG_1937.jpeg',n:['Theragon','ثيراغون'],tt:['Guardian of the White Gate','حارس البوابة البيضاء'],mp:['Multi-headed Beast','الوحش متعدد الرؤوس'],rk:'E',df:['Easy','سهلة'],e:1000,s:'agg',
+ ab:[['Triple Attack','هجوم ثلاثي'],['All heads strike in the same turn.','تهاجمك جميع الرؤوس في نفس الدور.']],
+ wk:['Can be lured into predictable moves.','يمكن استدراجه إلى تحركات متوقعة.'],
+ st:['Three heads, one goal: destroy everything in the way.','ثلاثة رؤوس. وهدف واحد: إبادة كل ما يقف في طريقه.'],
+ q:["Three heads watch you, six eyes that never blink. Nobody crossed this gate without losing everything. Show me a mind worth saving!",'ثلاثة رؤوس تراقبك… وستة عيون لا ترمش. أنا حارس هذه البوابة، ولم يعبر أحد من هنا إلا بعد أن فقد كل شيء. أرني إن كنت تملك عقلاً يستحق النجاة!']},
+{i:'IMG_1938.jpeg',n:['Valdrix','فالدريكس'],tt:['Lord of the Black Sky','سيد السماء السوداء'],mp:['Winged Dragon','التنين المجنح'],rk:'D',df:['Medium','متوسطة'],e:1400,s:'fly',
+ ab:[['Air Leap','القفزة الجوية'],['Strikes from the flanks with sudden moves.','يضرب من الأجنحة بحركات مفاجئة.']],
+ wk:['Leaves his defense open when he attacks.','يترك دفاعه مكشوفاً عندما يهاجم.'],
+ st:['Fast and proud. He thinks you are too slow to follow him.','سريع ومغرور. يرى أنك أبطأ من أن تفهم تحركاته.'],
+ q:["You passed the gatekeeper? Do not let that fool you. I do not need the ground to fight you. Fly with your mind... before you fall!",'هاه… لقد تجاوزت حارس البوابة؟ لا تجعل ذلك يخدعك. أنا لا أحتاج إلى الأرض كي أقاتلك، ولا أحتاج إلى الاقتراب منك حتى أسحقك. حلّق بعقلك إن استطعت… قبل أن تسقط!']},
+{i:'IMG_1939.jpeg',n:['Garmath','غارماث'],tt:['Fortress of Thorns','حصن الأشواك'],mp:['Armored Hedgehog','القنفذ المدرع'],rk:'C',df:['Hard','صعبة'],e:2000,s:'def',
+ ab:[['Spiked Shield','الدرع الشوكي'],['Punishes careless attacks on defended pieces.','يعاقب الهجوم المتهور على القطع المحمية.']],
+ wk:['Slow to change his plan.','بطيء في تغيير خطته.'],
+ st:['Silent and stubborn. He attacks only when sure of the result.','صامت وعنيد. لا يهاجم إلا عندما يضمن النتيجة.'],
+ q:["Come closer... no, do not retreat now. Everyone who tried to break my defense left shattered pieces behind. Show me how you beat an unbreakable fortress.",'اقترب… لا، لا تتراجع الآن. كل من حاول اختراق دفاعي ترك خلفه قطعاً محطمة. أرني كيف ستنتصر على حصن لا يمكن اختراقه.']},
+{i:'IMG_1934.jpeg',n:['Solarius','سولاريوس'],tt:['Devourer of Kingdoms','آكل الممالك'],mp:['Flame Sun','شمس اللهب'],rk:'B',df:['Very hard','صعبة جداً'],e:1700,s:'burn',
+ ab:[['Rising Flame','اللهب المتصاعد'],['Keeps up constant, reckless pressure.','يضغط باستمرار واندفاع.']],
+ wk:['His rush leads him into tactical mistakes.','اندفاعه يوقعه في أخطاء تكتيكية.'],
+ st:['Mad and mocking. He plays with you before the end.','مجنون وساخر. يلعب معك قبل القضاء عليك.'],
+ q:["Hahaha! Finally, someone new to play with! Do you know the best thing about fire? It leaves nothing behind. Let me see your mind burn!",'هاهاهاهاها! أخيراً! شخص جديد جاء ليلعب معي! هل تعرف ما أجمل شيء في النار؟ أنها لا تترك شيئاً خلفها… هيا، دعني أرى كيف سيبدو عقلك عندما يبدأ بالاحتراق!']},
+{i:'IMG_1935.jpeg',n:['Nihil','نيهيل'],tt:['Master of Illusions','سيد الأوهام'],mp:['The Masked One','صاحب القناع'],rk:'A',df:['Nearly impossible','شبه مستحيلة'],e:2500,s:'illu',
+ ab:[['Illusion','الوهم'],['Shows decoy squares to mislead you. The rules never change.','يعرض مربعات مضللة ليخدعك. القواعد لا تتغير.']],
+ wk:['Overconfident in reading his opponent.','واثق أكثر من اللازم بقراءة خصمه.'],
+ st:['Calm and unreadable. He plays with your mind.','هادئ وغامض. يتلاعب بعقلك.'],
+ q:["You are a little different... you got here while the others fell. But tell me... are you sure you choose your own moves? Or did I let you reach me from the start?",'أنت مختلف قليلاً… لقد وصلت إلى هنا بينما سقط الآخرون. لكن أخبرني… هل أنت متأكد أنك أنت من يختار تحركاتك؟ أم أنني تركتك تصل إلى هنا منذ البداية؟']},
+{i:'IMG_1936.jpeg',n:['Lucian Dracula','لوسيان دراكولا'],tt:['The King Who Never Loses','الملك الذي لا يخسر'],mp:['Brother of Dracula','أخ دراكولا'],rk:'EX',df:['Unknown','مجهولة'],e:3200,s:'king',
+ ab:[['The Last King','الملك الأخير'],['Changes his style during the game.','يغيّر أسلوبه أثناء المباراة.']],
+ wk:['Not yet discovered.','لم تُكتشف بعد.'],
+ st:['The king who never loses.','الملك الذي لا يخسر.'],
+ q:["Oh... you finally arrived. I wondered when someone worthy of sitting across from me would come. Are you here for me, or for your little brother? Do not worry, he is fine. But before you take him... can you defeat a man who never learned the meaning of loss?",'أوه… لقد وصلت أخيراً. كنت أتساءل متى سيأتي شخص يستحق الجلوس أمامي. هل جئت من أجلي؟ أم جئت بحثاً عن أخيك الصغير؟ هاه… لا تقلق، إنه بخير. لكن قبل أن تأخذه… أريد أن أعرف شيئاً واحداً. هل تستطيع هزيمة رجل لم يعرف معنى الخسارة طوال حياته؟']}];
+const TM=[600,480,360,240,180,120];       /* seconds for each side */
+const DL=[1800,1500,1200,900,600,350];    /* boss thinking speed in ms */
+const NP=[[22,45],[46,40],[72,38],[86,60],[68,76],[45,72],[20,80]];
 const V={p:1,n:3,b:3,r:5,q:9,k:0};
+const GL={p:'♟',n:'♞',b:'♝',r:'♜',q:'♛',k:'♚'};
+const PAWN='<svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3.5"/><path d="M9 12h6l1 5H8zM6 20h12v2H6z"/></svg>';
+let adv=JSON.parse(localStorage.getItem('cc_adv2')||'{"c":0,"seen":0}');
+const saveA=()=>localStorage.setItem('cc_adv2',JSON.stringify(adv));
 
-/* progress */
-let adv=JSON.parse(localStorage.getItem('cc_adv')||'{"c":0}');
-const saveA=()=>localStorage.setItem('cc_adv',JSON.stringify(adv));
-
-/* sound */
+/* sound + music */
 let ac;
 function tone(f,d,v){if(!st.sfx)return;ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),t0=ac.currentTime;o.type='square';o.frequency.value=f;g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(.001,t0+d);o.connect(g);g.connect(ac.destination);o.start(t0);o.stop(t0+d)}
-const mu=new Audio('eight_squares_left.mp3');mu.loop=true;mu.volume=.3;
+const mu=new Audio('midnight_gambit.mp3');mu.loop=true;mu.volume=.3;
 document.addEventListener('pointerdown',()=>{if(st.music)mu.play().catch(()=>{})},{once:true});
 let tw=null;
 function say(el,s){
@@ -113,128 +168,168 @@ function say(el,s){
  tw=setInterval(()=>{
   if(i>=s.length){clearInterval(tw);return}
   const c=s[i++];el.textContent=s.slice(0,i);
-  if(c!=' ')tone(300+Math.random()*120,.05,.04)},30)}
+  if(c!=' ')tone(200+Math.random()*90,.05,.04)},28)}
 
-/* pixel art: shrinks the pictures and scales them up sharp */
-const PXC={};
-function pxl(src,cb){
- if(PXC[src])return cb(PXC[src]);
+/* removes the background of the boss pictures */
+const CC={};
+function cln(src,cb){
+ if(CC[src])return cb(CC[src]);
  const im=new Image();
  im.onload=()=>{try{
-  const k=40/Math.max(im.naturalWidth,im.naturalHeight),c=document.createElement('canvas');
-  c.width=Math.max(1,Math.round(im.naturalWidth*k));c.height=Math.max(1,Math.round(im.naturalHeight*k));
-  c.getContext('2d').drawImage(im,0,0,c.width,c.height);
-  PXC[src]=c.toDataURL();cb(PXC[src])}catch(e){cb(src)}};
+  const k=Math.min(1,500/Math.max(im.naturalWidth,im.naturalHeight)),w=Math.round(im.naturalWidth*k),h=Math.round(im.naturalHeight*k);
+  const c=document.createElement('canvas');c.width=w;c.height=h;
+  const x=c.getContext('2d');x.drawImage(im,0,0,w,h);
+  const d=x.getImageData(0,0,w,h),p=d.data,cs=[0,w-1,(h-1)*w,h*w-1];
+  const bg=[0,1,2].map(j=>cs.reduce((a,i)=>a+p[i*4+j],0)/4);
+  const dist=i=>Math.hypot(p[i*4]-bg[0],p[i*4+1]-bg[1],p[i*4+2]-bg[2]);
+  const seen=new Uint8Array(w*h),stack=[];
+  const push=i=>{if(!seen[i]&&dist(i)<60){seen[i]=1;stack.push(i)}};
+  for(let a=0;a<w;a++){push(a);push((h-1)*w+a)}
+  for(let b=0;b<h;b++){push(b*w);push(b*w+w-1)}
+  while(stack.length){const i=stack.pop(),cx=i%w,cy=(i/w)|0;
+   if(cx>0)push(i-1);if(cx<w-1)push(i+1);if(cy>0)push(i-w);if(cy<h-1)push(i+w)}
+  let keep=new Uint8Array(w*h);
+  for(let i=0;i<w*h;i++)keep[i]=seen[i]?0:1;
+  for(let r=0;r<3;r++){const nk=keep.slice();
+   for(let i=0;i<w*h;i++){if(keep[i])continue;const cx=i%w,cy=(i/w)|0;
+    if((cx>0&&keep[i-1])||(cx<w-1&&keep[i+1])||(cy>0&&keep[i-w])||(cy<h-1&&keep[i+w]))nk[i]=1}
+   keep=nk}
+  for(let i=0;i<w*h;i++)p[i*4+3]=keep[i]?255:0;
+  x.putImageData(d,0,0);CC[src]=c.toDataURL('image/png');cb(CC[src])
+ }catch(e){cb(src)}};
  im.onerror=()=>cb(src);im.src=src}
-function attachPx(){document.querySelectorAll('[data-px]').forEach(e=>pxl(e.dataset.px,u=>e.src=u))}
-
-/* pixel chess pieces */
-const SP={
-p:['........','...##...','..####..','...##...','..####..','...##...','.######.','.######.'],
-r:['.#.##.#.','.######.','..####..','..####..','..####..','..####..','.######.','.######.'],
-n:['..###...','.#####..','##.####.','#..####.','...####.','..#####.','.######.','.######.'],
-b:['...##...','..####..','..#.##..','..####..','...##...','..####..','.######.','.######.'],
-q:['#.#..#.#','########','.######.','..####..','..####..','..####..','.######.','.######.'],
-k:['...##...','.######.','...##...','..####..','..####..','..####..','.######.','.######.']};
-function pix(type,col){
- const m=col=='w'?'#fff':'#111',o=col=='w'?'#000':'#fff';let a='',b='';
- SP[type].forEach((r,y)=>[...r].forEach((c,x)=>{if(c=='#'){
-  [[-1,0],[1,0],[0,-1],[0,1]].forEach(d=>a+='<rect x="'+(x+1+d[0])+'" y="'+(y+1+d[1])+'" width="1" height="1"/>');
-  b+='<rect x="'+(x+1)+'" y="'+(y+1)+'" width="1" height="1"/>'}}));
- return '<svg viewBox="0 0 10 10" style="width:86%;height:86%" shape-rendering="crispEdges"><g fill="'+o+'">'+a+'</g><g fill="'+m+'">'+b+'</g></svg>'}
 
 /* screens */
-function show(id){document.querySelectorAll('.scr').forEach(e=>e.style.display=e.id==id?'block':'none')}
+function show(id){
+ document.querySelectorAll('.scr').forEach(e=>e.style.display=e.id==id?'block':'none');
+ $('top').style.display=id=='fight'?'none':'flex'}
+const fmt=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 function renderMap(){
  show('map');
- $('prog').textContent=t('prog')+': '+adv.c+' / 15';
- const order=[];
- for(let r=0;r<3;r++){const row=[0,1,2,3,4].map(k=>r*5+k);order.push(...(r==1?row.reverse():row))}
- $('grid').innerHTML=order.map(i=>{
-  const cl=i<adv.c,cu=i==adv.c;
-  return '<div class="nd '+(cl?'cl':cu?'cur':'lk')+'"'+((cl||cu)?' onclick="openBoss('+i+')"':'')+'><b>'+(i+1)+'</b>'+((cl||cu)?'<img class="px" data-px="'+B[i].i+'">':'?')+'</div>'}).join('');
- attachPx()}
-let cur=0;
+ const pts=NP.map(p=>p.join(',')).join(' ');
+ let h='<svg class="rt" viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points="'+pts+'" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="9 7" vector-effect="non-scaling-stroke" opacity=".85"/></svg>';
+ h+='<div class="nd" style="left:'+NP[0][0]+'%;top:'+NP[0][1]+'%"><span class="cas">🏰</span><div class="pl"><b>'+t('begin')+'</b></div></div>';
+ BS.forEach((b,i)=>{
+  const cl=i<adv.c,cu=i==adv.c,p=NP[i+1],hid=i==5&&!cl&&!cu;
+  h+='<div class="nd '+(cl?'cl':cu?'cu':'lk')+'" style="left:'+p[0]+'%;top:'+p[1]+'%"'+((cl||cu)?' onclick="openBoss('+i+')"':'')+'><img class="bp" data-b="'+i+'">'+(hid?'<span class="qm">?</span>':'')+'<div class="pl"><span class="pwn">'+PAWN+'</span><b>'+L(ST[i])+'</b><small>'+(hid?'? ? ?':L(b.mp))+'</small></div></div>'});
+ h+='<div class="ttl">'+t('title')+'</div>';
+ h+='<svg class="cmp" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#4a3a22" stroke-width="3"/><path d="M50 8L58 50 50 92 42 50Z M8 50L50 42 92 50 50 58Z" fill="#8a7550"/><text x="46" y="8" font-size="14" fill="#fff">N</text></svg>';
+ $('mapw').innerHTML=h;
+ BS.forEach((b,i)=>cln(b.i,u=>{const e=document.querySelector('[data-b="'+i+'"]');if(e)e.src=u}))}
+let bi=0;
 function openBoss(i){
- cur=i;const b=B[i];show('boss');
- pxl(b.i,u=>$('bimg').src=u);
- $('binfo').innerHTML='<b style="color:#ffd60a">'+b.n+'</b><br>'+t('rating')+': '+b.r+'<br>'+t('style')+': '+t(b.s)+'<br>'+t('open')+': '+b.o+'<br>'+t('weak')+': '+L(b.h)+'<br><span id="bl2"></span>';
- say($('bl2'),'"'+L(b.l)+'"')}
-function showEnd(){
- show('intro');say($('story'),t('end'));$('go').textContent=t('map');$('go').onclick=renderMap}
+ bi=i;const b=BS[i];show('boss');
+ cln(b.i,u=>$('bimg').src=u);
+ $('binfo').innerHTML='<div class="rk">'+b.rk+'</div><br><b style="font-size:1.3rem">'+L(b.n)+'</b><br>'+L(b.tt)+'<br>'+t('diff')+': '+L(b.df)+' · '+t('time')+': '+fmt(TM[i]*1000)+'<br>'+t('weak')+': '+L(b.wk)+'<br><span id="qt" style="color:#e8d9ff"></span>';
+ say($('qt'),'«'+L(b.q)+'»')}
+function showEnd(){show('intro');$('h').textContent='';say($('story'),t('end'));$('go').textContent=t('map');$('go').onclick=renderMap}
 function ui(){
  document.documentElement.dir=st.lang=='ar'?'rtl':'ltr';
- $('bk').textContent=t('back');$('bl').textContent=st.lang=='en'?'AR':'EN';
- $('h').textContent=t('title');$('fb').textContent=t('fight');$('mb1').textContent=t('map');$('rt').textContent=t('map');
- $('go').textContent=t('start')}
+ $('bk').textContent=t('back');$('bl').textContent=st.lang=='en'?'العربية':'English';
+ $('h').textContent=t('title');$('go').textContent=t('start');
+ $('fb').textContent=t('fight');$('mb1').textContent=t('map');
+ $('sur').textContent=t('sur');$('und').textContent=t('undo');$('endt').textContent=t('endT');$('rm').textContent=t('map');
+ $('rr').textContent=t('retry')}
 
 /* fight: you are White, the boss is Black */
-let G,sel=null,last=[],over=false,busy=false,bm=0,eng=null,eok=false,pend=null;
-const PAL=['#c4b5fd','#4c1d95'];
+let G,sel=null,last=[],over=true,pend=false,turn='p',bm=0,clk={p:0,b:0},act=null,tick=null,eng=null,eok=false,pnd=null,decoy=null,sty='agg';
 function startEng(){
  if(eng)return;
  fetch('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js').then(r=>r.text()).then(x=>{
   eng=new Worker(URL.createObjectURL(new Blob([x],{type:'text/javascript'})));
-  eng.onmessage=e=>{const l=String(e.data);if(l=='uciok')eok=true;
-   if(l.startsWith('bestmove')&&pend){const p=pend;pend=null;p(l.split(' ')[1])}};
+  eng.onmessage=e=>{const l=String(e.data);if(l=='uciok')eok=true;if(l.startsWith('bestmove')&&pnd){const p=pnd;pnd=null;p(l.split(' ')[1])}};
   eng.postMessage('uci')}).catch(()=>{})}
+const mat=c=>{let s=0;G.board().flat().forEach(p=>{if(p&&p.color==c)s+=V[p.type]});return s};
+function hpUp(){const v=Math.round(1000*mat('b')/39);$('hpf').style.width=v/10+'%';$('hpt').textContent='HP '+v+' / 1000'}
+function fillFight(){
+ const b=BS[bi];
+ $('fst').textContent=L(ST[bi]);$('fnm').textContent=L(b.n)+' · '+L(b.tt);
+ $('stbox').textContent=L(b.st);
+ $('at1').textContent=t('abil');$('at2').textContent=L(b.ab[0]);$('at3').textContent=L(b.ab[1]);
+ $('et1').textContent=t('enT');$('mt1').textContent=t('yourT')}
 function startFight(){
- const b=B[cur];startEng();
- G=new Chess();sel=null;last=[];over=false;busy=false;bm=0;
- show('fight');pxl(b.i,u=>$('fimg').src=u);
- say($('talk'),'"'+L(b.l)+'"');$('msg').textContent=t('your');render()}
+ const b=BS[bi];startEng();
+ G=new Chess();sel=null;last=[];over=false;pend=false;turn='p';bm=0;decoy=null;sty=b.s=='king'?'def':b.s;
+ clk.p=clk.b=TM[bi]*1000;act='p';
+ show('fight');fillFight();
+ cln(b.i,u=>$('fimg').src=u);cln('IMG_1785.jpeg',u=>$('pimg').src=u);
+ clearInterval(tick);tick=setInterval(tk,100);
+ $('res').style.display='none';hpUp();render();upd();clocks()}
+function clocks(){$('pclk').textContent='⌛ '+fmt(clk.p);$('bclk').textContent='⌛ '+fmt(clk.b)}
+function tk(){if(over||!act)return;clk[act]-=100;clocks();if(clk[act]<=0)fin(act=='b'?'tw':'tl')}
+function upd(){
+ const my=turn=='p'&&!over;
+ $('mt2').textContent=my?t(pend?'mv2':'mv1'):t('en2');
+ $('et2').textContent=turn=='b'&&!over?t('en1'):t('en2');
+ $('endt').disabled=!pend||over;$('und').disabled=!pend||over;
+ $('me').classList.toggle('on',my);$('en').classList.toggle('on',turn=='b'&&!over)}
 function render(){
  const hints=sel?G.moves({square:sel,verbose:true}).map(m=>m.to):[];
  let h='';
  for(let y=0;y<8;y++)for(let x=0;x<8;x++){
   const n='abcdefgh'[x]+(8-y),p=G.get(n);
-  h+='<div class="sq'+(last.includes(n)?' l':'')+(sel==n?' s':'')+(hints.includes(n)?' d':'')+'" data-s="'+n+'" style="left:'+x*12.5+'%;top:'+y*12.5+'%;background:'+((x+y)%2?PAL[1]:PAL[0])+'">'+(p?pix(p.type,p.color):'')+'</div>'}
+  h+='<div class="sq'+(last.includes(n)?' l':'')+(sel==n?' s':'')+(hints.includes(n)?' d':'')+(decoy==n?' c':'')+'" data-s="'+n+'" style="left:'+x*12.5+'%;top:'+y*12.5+'%;background:'+((x+y)%2?'#2b2433':'#d9d3e6')+'">'+(p?'<span class="p'+p.color+'">'+GL[p.type]+'\uFE0E</span>':'')+'</div>'}
  $('bd').innerHTML=h}
-$('bd').onclick=e=>{const s=e.target.closest('.sq');if(s)click(s.dataset.s)};
-function click(sq){
- if(over||busy||G.turn()!='w')return;
+$('bd').onclick=e=>{const s=e.target.closest('.sq');if(s)pickSq(s.dataset.s)};
+function pickSq(sq){
+ if(over||turn!='p'||pend)return;
  if(sel&&sel!=sq&&G.moves({square:sel,verbose:true}).some(m=>m.to==sq)){
-  const m=G.move({from:sel,to:sq,promotion:'q'});sel=null;last=[m.from,m.to];render();
-  tone(m.captured?200:330,.08,.08);
-  if(!end())setTimeout(bossMove,500);
-  return}
- const p=G.get(sq);
- sel=p&&p.color=='w'?sq:null;render()}
-function end(){
+  const m=G.move({from:sel,to:sq,promotion:'q'});sel=null;last=[m.from,m.to];pend=true;
+  tone(m.captured?200:330,.08,.08);hpUp();render();upd();return}
+ const p=G.get(sq);sel=p&&p.color=='w'?sq:null;render()}
+function chk(){
  if(!G.game_over())return false;
- over=true;
- if(G.in_checkmate()&&G.turn()=='b'){
-  $('msg').textContent=t('win');tone(784,.3,.1);
-  if(cur==adv.c){adv.c++;saveA()}
-  setTimeout(()=>{if(adv.c>=15&&cur==14)showEnd();else renderMap()},2200)}
- else $('msg').textContent=G.in_checkmate()?t('lose'):t('draw');
+ if(G.in_checkmate())fin(G.turn()=='b'?'w':'l');else fin('d');
  return true}
+function fin(k){
+ if(over)return;over=true;act=null;clearInterval(tick);
+ const win=k=='w'||k=='tw';
+ if(win){tone(784,.3,.1);if(bi==adv.c&&adv.c<6){adv.c++;saveA()}if(k=='w'){$('hpf').style.width='0%';$('hpt').textContent='HP 0 / 1000'}}else tone(150,.4,.1);
+ $('rt1').textContent=(win?t('win'):k=='d'?t('draw'):t('lose'))+(k=='tw'?' '+t('tw'):k=='tl'?' '+t('tl'):'');
+ $('rr').style.display=win?'none':'inline-block';
+ $('res').style.display='flex';upd()}
 function bossMove(){
  if(over)return;
- const b=B[cur],ms=G.moves({verbose:true});
- busy=true;
- const play=m=>{G.move(m);bm++;last=[m.from,m.to];busy=false;render();tone(m.captured?200:300,.08,.08);end()};
- const op=b.op[bm],om=op&&ms.find(x=>x.san==op);
- if(om)return play(om);
- const rp=Math.min(.95,(b.e<1500?(1500-b.e)/1500:0)+(b.s=='wild'?.15:0));
+ const b=BS[bi],ms=G.moves({verbose:true});
+ if(b.s=='king'&&bm>0&&bm%10==0)sty=sty=='agg'?'def':'agg';
+ const play=m=>{
+  G.move(m);bm++;last=[m.from,m.to];
+  decoy=null;if(b.s=='illu'&&Math.random()<.45)decoy='abcdefgh'[Math.floor(Math.random()*8)]+(1+Math.floor(Math.random()*8));
+  turn='p';act='p';hpUp();render();upd();tone(m.captured?200:300,.08,.08);chk()};
+ const caps=ms.filter(x=>x.captured||x.san.includes('+'));
+ const bestCap=()=>caps.sort((a,z)=>(V[z.captured||'p']+(z.san.includes('+')?1:0))-(V[a.captured||'p']+(a.san.includes('+')?1:0)))[0];
+ const rp=Math.min(.9,b.e<1500?(1500-b.e)/1500:0);
  if(Math.random()<rp)return play(R(ms));
- if(b.s=='greedy'){
-  const c=ms.filter(x=>x.captured);
-  if(c.length&&Math.random()<.5)return play(c.sort((a,z)=>V[z.captured]-V[a.captured])[0])}
+ if(sty=='agg'&&caps.length&&Math.random()<.55)return play(bestCap());
+ if(sty=='fly'&&Math.random()<.15)return play(R(ms));
+ if(sty=='burn'&&Math.random()<.3)return play(caps.length?R(caps):R(ms));
  if(!eng||!eok)return play(R(ms));
- pend=u=>play(ms.find(x=>x.from+x.to==(u||'').slice(0,4))||R(ms));
- setTimeout(()=>{if(pend){const p=pend;pend=null;p('')}},6000);
+ pnd=u=>play(ms.find(x=>x.from+x.to==(u||'').slice(0,4))||R(ms));
+ setTimeout(()=>{if(pnd){const p=pnd;pnd=null;p('')}},6000);
  eng.postMessage('setoption name Skill Level value '+Math.max(0,Math.min(20,Math.round((b.e-1300)/85))));
  eng.postMessage('position fen '+G.fen());
- eng.postMessage('go movetime '+Math.round(300+b.e/6))}
+ eng.postMessage('go movetime '+Math.round(Math.min(900,DL[bi]*.7)))}
+$('endt').onclick=()=>{
+ if(!pend||over)return;pend=false;
+ if(chk())return;
+ turn='b';act='b';upd();
+ setTimeout(bossMove,DL[bi]*(.6+Math.random()*.8))};
+$('und').onclick=()=>{if(!pend||over)return;G.undo();pend=false;last=[];hpUp();render();upd()};
+$('sur').onclick=()=>{if(!over)fin('l')};
 
 $('go').onclick=()=>{adv.seen=1;saveA();renderMap()};
 $('fb').onclick=startFight;
 $('mb1').onclick=renderMap;
-$('rt').onclick=()=>{over=true;renderMap()};
-$('bl').onclick=()=>{st.lang=st.lang=='en'?'ar':'en';save();ui();if($('map').style.display=='block')renderMap()};
+$('xb').onclick=()=>{over=true;clearInterval(tick);renderMap()};
+$('rr').onclick=startFight;
+$('rm').onclick=()=>{$('res').style.display='none';clearInterval(tick);if(adv.c>=6&&bi==5&&over&&!adv.end){adv.end=1;saveA();showEnd()}else renderMap()};
+$('gb').onclick=$('bl').onclick=()=>{
+ st.lang=st.lang=='en'?'ar':'en';save();ui();
+ if($('fight').style.display=='block'){fillFight();upd()}
+ else if($('map').style.display=='block')renderMap();
+ else if($('boss').style.display=='block')openBoss(bi)};
 ui();
-if(adv.seen){renderMap()}else{say($('story'),t('story'))}
+if(adv.seen)renderMap();else{show('intro');say($('story'),t('story'))}
 </script>
 </body>
 </html>
