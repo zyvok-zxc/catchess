@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cat Chess - Pixel Adventure</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;background:#120a24;color:#fff;font-family:'Press Start 2P','Courier New',monospace;text-align:center}
+#stars{position:fixed;inset:0;z-index:-1;background:radial-gradient(#fff 1px,transparent 1.5px) 0 0/40px 40px,radial-gradient(#ff77c8 1px,transparent 1.5px) 20px 20px/60px 60px,#120a24}
+.w{max-width:560px;margin:auto;padding:14px 10px}
+.bar{display:flex;justify-content:space-between;align-items:center}
+.pb{display:inline-block;font:inherit;font-size:.65rem;color:#fff;background:#3b1f7a;border:4px solid #ff77c8;box-shadow:4px 4px 0 #000;padding:12px 14px;margin:8px;cursor:pointer;text-decoration:none}
+.pb:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
+h1{font-size:1.1rem;color:#ffd60a;text-shadow:3px 3px 0 #ff1493;line-height:1.5}
+.panel{background:#24123f;border:4px solid #ff77c8;box-shadow:6px 6px 0 #000;padding:12px;margin:10px 0;font-size:.6rem;line-height:1.9;text-align:start}
+.px{image-rendering:pixelated}
+#grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0}
+.nd{aspect-ratio:1;position:relative;background:#3b1f7a;border:4px solid #8a6ad8;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;overflow:hidden}
+.nd img{width:100%;height:100%;object-fit:cover}
+.nd b{position:absolute;top:0;left:0;background:#000;font-size:.45rem;padding:2px 4px;font-weight:normal;z-index:1}
+.nd.cl{border-color:#4ade80}
+.nd.cur{border-color:#ffd60a;animation:bl 1s steps(2) infinite}
+.nd.lk{opacity:.5;cursor:not-allowed}
+@keyframes bl{50%{border-color:#fff}}
+img.big{width:min(60vw,220px);height:auto;background:#fff;border:4px solid #000;margin:8px auto;display:block}
+.top{display:flex;gap:10px;align-items:center}
+.top img{width:72px;height:72px;object-fit:cover;background:#fff;border:4px solid #000;flex:none}
+.top .panel{flex:1;margin:0}
+#bd{direction:ltr;position:relative;width:min(96vw,480px);aspect-ratio:1;margin:10px auto;border:4px solid #ff77c8;user-select:none}
+.sq{position:absolute;width:12.5%;height:12.5%;display:flex;align-items:center;justify-content:center}
+.sq.l{box-shadow:inset 0 0 0 100px rgba(255,235,59,.4)}
+.sq.s{box-shadow:inset 0 0 0 100px rgba(255,235,59,.7)}
+.sq.d::after{content:"";position:absolute;inset:38%;background:rgba(0,0,0,.45)}
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<div class="w">
+  <div class="bar"><a id="bk" class="pb" href="index.html" style="margin:0"></a><button id="bl" class="pb" style="margin:0"></button></div>
+  <h1 id="h"></h1>
+
+  <div id="intro" class="scr"><div class="panel" id="story"></div><button class="pb" id="go"></button></div>
+
+  <div id="map" class="scr" style="display:none"><div class="panel" id="prog"></div><div id="grid"></div></div>
+
+  <div id="boss" class="scr" style="display:none">
+    <img id="bimg" class="px big">
+    <div class="panel" id="binfo"></div>
+    <button class="pb" id="fb"></button><button class="pb" id="mb1"></button>
+  </div>
+
+  <div id="fight" class="scr" style="display:none">
+    <div class="top"><img id="fimg" class="px"><div class="panel" id="talk"></div></div>
+    <div id="bd"></div>
+    <div class="panel" id="msg"></div>
+    <button class="pb" id="rt"></button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const R=a=>a[Math.floor(Math.random()*a.length)];
+const S=JSON.parse(localStorage.getItem('cc')||'{}');
+const st={lang:S.lang||'en',music:S.music!==false,sfx:S.sfx!==false};
+const save=()=>localStorage.setItem('cc',JSON.stringify(Object.assign(JSON.parse(localStorage.getItem('cc')||'{}'),st)));
+const L=x=>x[st.lang=='ar'?1:0];
+const T={
+ title:['PIXEL ADVENTURE','المغامرة البكسلية'],back:['< BACK','رجوع >'],
+ start:['START','ابدأ'],map:['MAP','الخريطة'],fight:['FIGHT!','قاتل!'],
+ story:['Your little brother was taken by the Count of the Board, Dracula. Fifteen guardians hold the road to his castle. Beat each one at chess, find your brother, and bring him home.','أخوك الصغير أخذه كونت الرقعة، دراكولا. خمسة عشر حارساً يسدّون الطريق لقلعته. اهزم كل واحد منهم في الشطرنج، وجد أخوك، وارجع به للبيت.'],
+ end:['Dracula falls. Your brother runs into your paws. The road is closed... for now. THE END.','سقط دراكولا. ركض أخوك إلى حضنك. أُغلق الطريق... مؤقتاً. النهاية.'],
+ prog:['Bosses defeated','البوسات المهزومة'],rating:['RATING','التصنيف'],style:['STYLE','الأسلوب'],
+ open:['OPENING','الافتتاحية'],weak:['WEAKNESS','نقطة الضعف'],
+ wild:['Chaotic','فوضوي'],greedy:['Greedy','طماع'],solid:['Solid','متماسك'],
+ win:['BOSS DEFEATED! The road opens.','هزمت البوس! انفتح الطريق.'],lose:['You lost. Try again!','خسرت. حاول مرة ثانية!'],draw:['Draw. Try again!','تعادل. حاول مرة ثانية!'],
+ your:['Your move (White)','دورك (الأبيض)'],unk:['????','????']};
+const t=k=>L(T[k]);
+
+/* the 15 bosses: e = engine strength, s = style, op = the black moves he likes to open with */
+const B=[
+{n:'Stupi',i:'IMG_1748.jpeg',e:200,r:'200',s:'wild',o:"Grob's Attack",op:['a5','h5'],h:['Moves almost at random. Do not blunder and he falls.','يتحرك شبه عشوائي. لا تخطئ وهو يسقط.'],l:['Beep! Hello! Who are you?','هلااا! من أنت؟']},
+{n:'The Ghost Cat',i:'IMG_1707.png',e:700,r:'700',s:'wild',o:'Spooky Opening',op:['e5'],h:['Moves wildly. Punish loose pieces.','يتحرك بجنون. عاقب القطع المكشوفة.'],l:['Boo! Can you see me?','بووو! هل تراني؟']},
+{n:'Cat 67',i:'IMG_1703.png',e:900,r:'900',s:'wild',o:'The 67 Opening',op:['b6','Bb7'],h:['Chaotic and weak. Keep your king safe.','فوضوي وضعيف. احمِ ملكك.'],l:['67 67 67! Let us play!','67 67 67! لنلعب!']},
+{n:'Pumpkin Kid',i:'IMG_1746.jpeg',e:1200,r:'1200',s:'wild',o:'Four Knights',op:['e5','Nc6','Nf6'],h:['Nervous. He drops pieces under pressure.','متوتر. يضيّع القطع تحت الضغط.'],l:['P-please be gentle...','أ-أرجوك كن لطيفاً...']},
+{n:'Fish Cat',i:'IMG_1768.jpeg',e:1567,r:'1567',s:'greedy',o:'Great Fish Opening',op:['e5'],h:['Grabs any piece he can. Offer him nothing.','يأكل أي قطعة يقدر عليها. لا تعطه شي.'],l:['Meow! Fish?','مياو! سمك؟']},
+{n:'Jimmy',i:'IMG_1750.jpeg',e:1600,r:'1600',s:'solid',o:'Italian Game',op:['e5','Nc6','Bc5'],h:['Solid but simple. Develop your pieces fast.','متماسك لكن بسيط. طوّر قطعك بسرعة.'],l:['Ready? Let us go!','جاهز؟ يلا!']},
+{n:'The Musical Cat',i:'IMG_1706.png',e:1700,r:'1700',s:'solid',o:'The Quiet Fugue',op:['d5','e6'],h:['Calm and careful. Do not rush.','هادئ وحذر. لا تستعجل.'],l:['Hm. Let the music begin.','همم. لتبدأ الموسيقى.']},
+{n:'The Wizard',i:'IMG_1755.jpeg',e:1800,r:'1800',s:'solid',o:'Ruy Lopez',op:['e5','Nc6','a6'],h:['Loves tricks. Watch every check.','يحب الحيل. انتبه لكل كش.'],l:['Behold my magic!','شاهد سحري!']},
+{n:'Green Coat Girl',i:'IMG_1749.jpeg',e:1987,r:'1987',s:'solid',o:'London System',op:['d5','Nf6','e6'],h:['Peaceful but accurate. Trade pieces carefully.','هادئة لكنها دقيقة. بدّل القطع بحذر.'],l:['I hope it is a lovely game.','أتمنى أن تكون مباراة جميلة.']},
+{n:'Amelia',i:'IMG_1747.jpeg',e:2000,r:'2000',s:'greedy',o:"King's Gambit",op:['e5','Nf6'],h:['Greedy for captures. Set traps with bait.','طماعة في الأكل. انصب لها فخاً بطُعم.'],l:['Let us smash this board!','لنحطم هذه الرقعة!']},
+{n:'Om',i:'IMG_1745.jpeg',e:2100,r:'2100',s:'solid',o:'Italian Game',op:['e5','Nc6','Nf6'],h:['Suspicious and sharp. Avoid risky ideas.','شكاك وحاد. تجنب الأفكار الخطرة.'],l:['I sense a trap...','أشعر أن هناك فخاً...']},
+{n:'Al-Jameel',i:'IMG_1765.jpeg',e:2450,r:'2450',s:'solid',o:"King's Indian",op:['Nf6','g6','Bg7','d6'],h:['Strong and proud. He bends but rarely breaks.','قوي ومغرور. ينحني لكن نادراً ينكسر.'],l:['You may admire me now.','تقدر تعجب بي الحين.']},
+{n:'Clown Cat',i:'IMG_1769.jpeg',e:2670,r:'2670',s:'greedy',o:'Sicilian Dragon',op:['c5','g6','Bg7'],h:['Greedy and tricky. Count every sacrifice.','طماع وماكر. احسب كل تضحية.'],l:['Do not turn around...','لا تلتفت...']},
+{n:'The Obsessed Cat',i:'IMG_1705.png',e:3000,r:'3000',s:'solid',o:'Slav Defense',op:['d5','c6','Nf6'],h:['Near perfect. Only precision will do.','شبه مثالي. الدقة وحدها تنفع.'],l:['Do not embarrass yourself.','لا تحرج نفسك.']},
+{n:'Dracula',i:'IMG_1775.jpeg',e:3200,r:'????',s:'solid',o:'Sicilian Dragon',op:['c5','d6','Nf6','g6'],h:['The Count of the Board. No weakness is known.','كونت الرقعة. ما أحد يعرف له نقطة ضعف.'],l:['Another visitor. How tiresome.','زائر آخر. كم هذا ممل.']}];
+const V={p:1,n:3,b:3,r:5,q:9,k:0};
+
+/* progress */
+let adv=JSON.parse(localStorage.getItem('cc_adv')||'{"c":0}');
+const saveA=()=>localStorage.setItem('cc_adv',JSON.stringify(adv));
+
+/* sound */
+let ac;
+function tone(f,d,v){if(!st.sfx)return;ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),t0=ac.currentTime;o.type='square';o.frequency.value=f;g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(.001,t0+d);o.connect(g);g.connect(ac.destination);o.start(t0);o.stop(t0+d)}
+const mu=new Audio('eight_squares_left.mp3');mu.loop=true;mu.volume=.3;
+document.addEventListener('pointerdown',()=>{if(st.music)mu.play().catch(()=>{})},{once:true});
+let tw=null;
+function say(el,s){
+ clearInterval(tw);el.textContent='';let i=0;
+ tw=setInterval(()=>{
+  if(i>=s.length){clearInterval(tw);return}
+  const c=s[i++];el.textContent=s.slice(0,i);
+  if(c!=' ')tone(300+Math.random()*120,.05,.04)},30)}
+
+/* pixel art: shrinks the pictures and scales them up sharp */
+const PXC={};
+function pxl(src,cb){
+ if(PXC[src])return cb(PXC[src]);
+ const im=new Image();
+ im.onload=()=>{try{
+  const k=40/Math.max(im.naturalWidth,im.naturalHeight),c=document.createElement('canvas');
+  c.width=Math.max(1,Math.round(im.naturalWidth*k));c.height=Math.max(1,Math.round(im.naturalHeight*k));
+  c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+  PXC[src]=c.toDataURL();cb(PXC[src])}catch(e){cb(src)}};
+ im.onerror=()=>cb(src);im.src=src}
+function attachPx(){document.querySelectorAll('[data-px]').forEach(e=>pxl(e.dataset.px,u=>e.src=u))}
+
+/* pixel chess pieces */
+const SP={
+p:['........','...##...','..####..','...##...','..####..','...##...','.######.','.######.'],
+r:['.#.##.#.','.######.','..####..','..####..','..####..','..####..','.######.','.######.'],
+n:['..###...','.#####..','##.####.','#..####.','...####.','..#####.','.######.','.######.'],
+b:['...##...','..####..','..#.##..','..####..','...##...','..####..','.######.','.######.'],
+q:['#.#..#.#','########','.######.','..####..','..####..','..####..','.######.','.######.'],
+k:['...##...','.######.','...##...','..####..','..####..','..####..','.######.','.######.']};
+function pix(type,col){
+ const m=col=='w'?'#fff':'#111',o=col=='w'?'#000':'#fff';let a='',b='';
+ SP[type].forEach((r,y)=>[...r].forEach((c,x)=>{if(c=='#'){
+  [[-1,0],[1,0],[0,-1],[0,1]].forEach(d=>a+='<rect x="'+(x+1+d[0])+'" y="'+(y+1+d[1])+'" width="1" height="1"/>');
+  b+='<rect x="'+(x+1)+'" y="'+(y+1)+'" width="1" height="1"/>'}}));
+ return '<svg viewBox="0 0 10 10" style="width:86%;height:86%" shape-rendering="crispEdges"><g fill="'+o+'">'+a+'</g><g fill="'+m+'">'+b+'</g></svg>'}
+
+/* screens */
+function show(id){document.querySelectorAll('.scr').forEach(e=>e.style.display=e.id==id?'block':'none')}
+function renderMap(){
+ show('map');
+ $('prog').textContent=t('prog')+': '+adv.c+' / 15';
+ const order=[];
+ for(let r=0;r<3;r++){const row=[0,1,2,3,4].map(k=>r*5+k);order.push(...(r==1?row.reverse():row))}
+ $('grid').innerHTML=order.map(i=>{
+  const cl=i<adv.c,cu=i==adv.c;
+  return '<div class="nd '+(cl?'cl':cu?'cur':'lk')+'"'+((cl||cu)?' onclick="openBoss('+i+')"':'')+'><b>'+(i+1)+'</b>'+((cl||cu)?'<img class="px" data-px="'+B[i].i+'">':'?')+'</div>'}).join('');
+ attachPx()}
+let cur=0;
+function openBoss(i){
+ cur=i;const b=B[i];show('boss');
+ pxl(b.i,u=>$('bimg').src=u);
+ $('binfo').innerHTML='<b style="color:#ffd60a">'+b.n+'</b><br>'+t('rating')+': '+b.r+'<br>'+t('style')+': '+t(b.s)+'<br>'+t('open')+': '+b.o+'<br>'+t('weak')+': '+L(b.h)+'<br><span id="bl2"></span>';
+ say($('bl2'),'"'+L(b.l)+'"')}
+function showEnd(){
+ show('intro');say($('story'),t('end'));$('go').textContent=t('map');$('go').onclick=renderMap}
+function ui(){
+ document.documentElement.dir=st.lang=='ar'?'rtl':'ltr';
+ $('bk').textContent=t('back');$('bl').textContent=st.lang=='en'?'AR':'EN';
+ $('h').textContent=t('title');$('fb').textContent=t('fight');$('mb1').textContent=t('map');$('rt').textContent=t('map');
+ $('go').textContent=t('start')}
+
+/* fight: you are White, the boss is Black */
+let G,sel=null,last=[],over=false,busy=false,bm=0,eng=null,eok=false,pend=null;
+const PAL=['#c4b5fd','#4c1d95'];
+function startEng(){
+ if(eng)return;
+ fetch('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js').then(r=>r.text()).then(x=>{
+  eng=new Worker(URL.createObjectURL(new Blob([x],{type:'text/javascript'})));
+  eng.onmessage=e=>{const l=String(e.data);if(l=='uciok')eok=true;
+   if(l.startsWith('bestmove')&&pend){const p=pend;pend=null;p(l.split(' ')[1])}};
+  eng.postMessage('uci')}).catch(()=>{})}
+function startFight(){
+ const b=B[cur];startEng();
+ G=new Chess();sel=null;last=[];over=false;busy=false;bm=0;
+ show('fight');pxl(b.i,u=>$('fimg').src=u);
+ say($('talk'),'"'+L(b.l)+'"');$('msg').textContent=t('your');render()}
+function render(){
+ const hints=sel?G.moves({square:sel,verbose:true}).map(m=>m.to):[];
+ let h='';
+ for(let y=0;y<8;y++)for(let x=0;x<8;x++){
+  const n='abcdefgh'[x]+(8-y),p=G.get(n);
+  h+='<div class="sq'+(last.includes(n)?' l':'')+(sel==n?' s':'')+(hints.includes(n)?' d':'')+'" data-s="'+n+'" style="left:'+x*12.5+'%;top:'+y*12.5+'%;background:'+((x+y)%2?PAL[1]:PAL[0])+'">'+(p?pix(p.type,p.color):'')+'</div>'}
+ $('bd').innerHTML=h}
+$('bd').onclick=e=>{const s=e.target.closest('.sq');if(s)click(s.dataset.s)};
+function click(sq){
+ if(over||busy||G.turn()!='w')return;
+ if(sel&&sel!=sq&&G.moves({square:sel,verbose:true}).some(m=>m.to==sq)){
+  const m=G.move({from:sel,to:sq,promotion:'q'});sel=null;last=[m.from,m.to];render();
+  tone(m.captured?200:330,.08,.08);
+  if(!end())setTimeout(bossMove,500);
+  return}
+ const p=G.get(sq);
+ sel=p&&p.color=='w'?sq:null;render()}
+function end(){
+ if(!G.game_over())return false;
+ over=true;
+ if(G.in_checkmate()&&G.turn()=='b'){
+  $('msg').textContent=t('win');tone(784,.3,.1);
+  if(cur==adv.c){adv.c++;saveA()}
+  setTimeout(()=>{if(adv.c>=15&&cur==14)showEnd();else renderMap()},2200)}
+ else $('msg').textContent=G.in_checkmate()?t('lose'):t('draw');
+ return true}
+function bossMove(){
+ if(over)return;
+ const b=B[cur],ms=G.moves({verbose:true});
+ busy=true;
+ const play=m=>{G.move(m);bm++;last=[m.from,m.to];busy=false;render();tone(m.captured?200:300,.08,.08);end()};
+ const op=b.op[bm],om=op&&ms.find(x=>x.san==op);
+ if(om)return play(om);
+ const rp=Math.min(.95,(b.e<1500?(1500-b.e)/1500:0)+(b.s=='wild'?.15:0));
+ if(Math.random()<rp)return play(R(ms));
+ if(b.s=='greedy'){
+  const c=ms.filter(x=>x.captured);
+  if(c.length&&Math.random()<.5)return play(c.sort((a,z)=>V[z.captured]-V[a.captured])[0])}
+ if(!eng||!eok)return play(R(ms));
+ pend=u=>play(ms.find(x=>x.from+x.to==(u||'').slice(0,4))||R(ms));
+ setTimeout(()=>{if(pend){const p=pend;pend=null;p('')}},6000);
+ eng.postMessage('setoption name Skill Level value '+Math.max(0,Math.min(20,Math.round((b.e-1300)/85))));
+ eng.postMessage('position fen '+G.fen());
+ eng.postMessage('go movetime '+Math.round(300+b.e/6))}
+
+$('go').onclick=()=>{adv.seen=1;saveA();renderMap()};
+$('fb').onclick=startFight;
+$('mb1').onclick=renderMap;
+$('rt').onclick=()=>{over=true;renderMap()};
+$('bl').onclick=()=>{st.lang=st.lang=='en'?'ar':'en';save();ui();if($('map').style.display=='block')renderMap()};
+ui();
+if(adv.seen){renderMap()}else{say($('story'),t('story'))}
+</script>
+</body>
+</html>
