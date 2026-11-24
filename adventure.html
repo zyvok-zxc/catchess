@@ -23,11 +23,9 @@ html,body{margin:0;background:var(--bg);color:var(--sv);font-family:Cairo,system
 #intro.on{display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:20px;background:radial-gradient(ellipse at 50% 30%,#2b1a4a,var(--bg) 70%)}
 #intro h2{font-size:clamp(1.6rem,6vw,3rem);color:var(--gd);text-shadow:0 0 24px var(--mg);margin:0 0 14px}
 #story{max-width:560px;line-height:2;min-height:120px;font-size:1.05rem}
-#mapwrap{overflow:auto;padding:0 0 14px}
-#world{position:relative;width:max(100%,860px);aspect-ratio:3/2;margin:auto;border:3px solid var(--gd);box-shadow:0 0 0 3px #0a0710,inset 0 0 60px rgba(0,0,0,.7);overflow:hidden;direction:ltr;background:#17112a url(world_map.jpeg) center/cover}
-#world svg.wm{position:absolute;inset:0;width:100%;height:100%}
-.fogm{position:absolute;left:-30%;width:160%;height:26%;background:radial-gradient(ellipse,rgba(200,190,230,.22),transparent 65%);animation:drift 22s ease-in-out infinite alternate;pointer-events:none}
-@keyframes drift{to{transform:translateX(14%)}}
+#mapwrap{overflow:auto;padding:0 0 10px}
+#world{position:relative;width:max(100%,860px);margin:auto;border:3px solid var(--gd);box-shadow:0 0 0 3px #0a0710,inset 0 0 60px rgba(0,0,0,.7);overflow:hidden;direction:ltr;background:#17112a}
+#wimg{display:block;width:100%;height:auto}
 .nd{position:absolute;transform:translate(-50%,-50%);width:clamp(110px,15%,170px);text-align:center;z-index:3;cursor:pointer;direction:rtl}
 .md{position:relative;width:clamp(64px,8.5vw,104px);aspect-ratio:1;margin:0 auto -14px;border-radius:50%;border:3px solid var(--gd);background:radial-gradient(circle,#3a2660,#150f22);box-shadow:0 0 0 3px #0a0710,0 6px 14px rgba(0,0,0,.7);overflow:hidden;display:flex;align-items:center;justify-content:center}
 .md img{width:100%;height:100%;object-fit:contain}.md svg{width:68%;height:68%}
@@ -43,6 +41,11 @@ html,body{margin:0;background:var(--bg);color:var(--sv);font-family:Cairo,system
 .rk{position:absolute;top:-10px;inset-inline-end:-6px;background:#150f22;border:2px solid var(--gd);color:var(--gd);font-weight:900;font-size:.75rem;width:26px;height:26px;border-radius:50%;line-height:22px}
 .sttag{display:inline-block;font-size:.6rem;padding:0 6px;border-radius:8px;margin-top:2px;background:#0a0710}
 .av .sttag{color:var(--gd)}.cl .sttag{color:#7fe0a0}.pg .sttag{color:#b99cff}.lk .sttag{color:#8a849c}
+.hit{width:clamp(60px,10vw,100px);aspect-ratio:1;margin:auto;border-radius:50%;border:3px solid transparent;display:flex;align-items:center;justify-content:center}
+.hit svg{width:46%}.ck{color:#7fe0a0;font-size:2rem;font-weight:900;text-shadow:0 0 8px #000}
+.nd.av .hit{border-color:var(--gd);box-shadow:0 0 24px 6px rgba(197,166,106,.85);animation:pulse 1.8s ease-in-out infinite}
+.nd.pg .hit{border-color:#b99cff;box-shadow:0 0 24px 6px rgba(117,69,184,.95)}
+.nd.cl .hit{border-color:#7fe0a0}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:60;background:#150f22;border:2px solid var(--gd);padding:8px 16px;border-radius:8px;display:none}
 #cine{overflow:hidden}
 #carena{position:absolute;inset:0;animation:zm 24s ease-in-out infinite alternate}
@@ -56,6 +59,7 @@ html,body{margin:0;background:var(--bg);color:var(--sv);font-family:Cairo,system
 #fade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:70;transition:opacity .6s}
 .ar{position:absolute;inset:0;overflow:hidden}.ar>svg{position:absolute;inset:0;width:100%;height:100%}
 .fgf{position:absolute;left:-20%;right:-20%;bottom:0;height:45%;background:radial-gradient(ellipse at 30% 100%,rgba(255,255,255,.18),transparent 60%),radial-gradient(ellipse at 80% 100%,rgba(255,255,255,.12),transparent 55%);animation:drift 16s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translateX(14%)}}
 .pt{position:absolute;width:6px;height:10px;border-radius:50%;opacity:.8;animation:fall linear infinite}
 @keyframes fall{to{transform:translateY(115vh) rotate(360deg)}}
 @keyframes rise{to{transform:translateY(-115vh)}}
@@ -70,7 +74,7 @@ html,body{margin:0;background:var(--bg);color:var(--sv);font-family:Cairo,system
 .bar.red i{background:linear-gradient(#d04560,var(--rd))}.bar.pur i{background:linear-gradient(#9a6ae0,var(--mg))}
 .bar span{position:absolute;inset:0;text-align:center;font-size:.72rem;line-height:16px;color:#fff}
 .clk{font-weight:900;font-size:1.05rem;color:var(--gd)}.clk.act{color:#fff;text-shadow:0 0 8px var(--mg)}
-#fl{grid-area:fl;display:flex;flex-direction:column;gap:10px;background:none}
+#fl{grid-area:fl;display:flex;flex-direction:column;gap:10px}
 #fm{grid-area:fm;display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
 #fr{grid-area:fr;display:flex;flex-direction:column;gap:10px}
 #fb{grid-area:fb;display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
@@ -110,7 +114,10 @@ details.fr{background:rgba(14,9,22,.88)}summary{cursor:pointer;color:var(--gd);f
 
 <section id="intro" class="scr"><h2 id="ih"></h2><div id="story" class="fr pad"></div><button id="go" class="bt" style="margin-top:16px"></button></section>
 
-<section id="map" class="scr"><div id="mapwrap"><div id="world"></div></div></section>
+<section id="map" class="scr">
+ <div id="mapwrap"><div id="world"></div></div>
+ <div style="text-align:center;padding:8px"><div id="calh" class="fr pad" style="display:none;margin:0 auto 10px;max-width:520px"></div><button id="calb" class="bt"></button> <button id="cald" class="bt"></button></div>
+</section>
 
 <section id="cine" class="scr">
  <div id="carena"></div><img id="cimg">
@@ -153,12 +160,16 @@ const S=JSON.parse(localStorage.getItem('cc')||'{}');
 const st={lang:S.lang||'ar',music:S.music!==false,sfx:S.sfx!==false};
 const save=()=>localStorage.setItem('cc',JSON.stringify(Object.assign(JSON.parse(localStorage.getItem('cc')||'{}'),st)));
 const L=x=>x[st.lang=='ar'?1:0];
+/* your map picture. If the stage names and boss pictures are already drawn inside the map, change false to true. */
+const MAP_FILE='9674EABB-5F0B-44AD-8702-013EC778B0DC.png';
+const LABELS_IN_ART=false;
 const T={
  title:['GOTHIC FANTASY CHESS','قلعة الشطرنج الملعونة'],back:['Back','رجوع'],start:['Begin the journey','ابدأ الرحلة'],
  story:['Lucian Dracula holds your little brother in his castle. Six guardians block the road through the Cursed Chess Kingdom. Defeat them one by one, face Lucian, and bring your brother home.','لوسيان دراكولا يحتجز أخاك الصغير في قلعته. ستة حراس يسدّون الطريق في مملكة الشطرنج الملعونة. اهزمهم واحداً بعد الآخر، وواجه لوسيان، وأعد أخاك إلى البيت.'],
  end:['Lucian lowers his head. "Your brother is safe. I only needed to know who was coming for him. The reason is a story for another night." TO BE CONTINUED.','خفض لوسيان رأسه. «أخوك بخير. كنت أحتاج فقط أن أعرف من الذي يأتي من أجله. أما السبب فهو حكاية لليلة أخرى.» يتبع…'],
- begin:['The Gate','البداية'],lk:['Locked','مقفلة'],av:['Available','متاحة'],pg:['In progress','قيد اللعب'],cl:['Cleared','مكتملة'],
+ begin:['The Gate','البداية'],unk:['???','؟؟؟'],lk:['Locked','مقفلة'],av:['Available','متاحة'],pg:['In progress','قيد اللعب'],cl:['Cleared','مكتملة'],
  lockmsg:['Defeat the previous guardian first.','اهزم الحارس السابق أولاً.'],skip:['Skip scene','تخطي المشهد'],go:['Enter the arena','ادخل الساحة'],
+ calb:['Place stage markers','ضبط مواقع المراحل'],cald:['Default positions','المواقع الافتراضية'],calp:['Tap the map where this goes','اضغط على الخريطة مكان'],
  yourT:['Your turn','دورك'],enT:['Enemy turn','دور العدو'],undo:['Undo','تراجع'],hint:['Hint','تلميح'],sur:['Surrender','استسلام'],exit:['Map','الخريطة'],
  mls:['Move log','سجل الحركات'],els:['Battle log','سجل المعركة'],abil:['Boss abilities','قدرات الزعيم'],diff:['Difficulty','الصعوبة'],iq:['Intelligence','الذكاء'],rank:['Rank','الرتبة'],time:['Time each','وقت كل طرف'],
  win:['VICTORY','انتصار'],lose:['DEFEAT','هزيمة'],draw:['DRAW','تعادل'],winT:['The road ahead opens.','انفتح الطريق أمامك.'],loseT:['The guardian still stands. Try again.','الحارس ما زال واقفاً. حاول مرة ثانية.'],
@@ -173,12 +184,12 @@ const T={
  e_bn:['You stepped into the flame: -10 seconds.','دخلت اللهب: -10 ثوانٍ.'],
  e_il:['Illusion: some purple-ringed squares are false.','الوهم: بعض المربعات ذات الحلقة البنفسجية خادعة.'],
  e_la:['The Last King turns aggressive.','الملك الأخير يتحول إلى الهجوم.'],e_ld:['The Last King turns defensive.','الملك الأخير يتحول إلى الدفاع.'],
- e_un:['Undo used: -20 seconds.','استُخدم التراجع: -20 ثانية.'],e_hn:['Hint used: -10 seconds.','استُخدم التلميح: -10 ثانية.']};
+ e_un:['Undo used: -20 seconds.','استُخدم التراجع: -20 ثانية.'],e_hn:['Hint used: -10 seconds.','استُخدم التلميح: -10 ثوانٍ.']};
 const t=k=>L(T[k]);
 const ST=[['Stage 1','المرحلة الأولى'],['Stage 2','المرحلة الثانية'],['Stage 3','المرحلة الثالثة'],['Stage 4','المرحلة الرابعة'],['Stage 5','المرحلة الخامسة'],['Final Stage','المرحلة الأخيرة']];
 /* boss pictures: change a file name here if a picture belongs to a different boss */
 const IMGS=['IMG_1937.jpeg','IMG_1938.jpeg','IMG_1939.jpeg','IMG_1934.jpeg','IMG_1935.jpeg','IMG_1936.jpeg'];
-/* e = how well he plays (intelligence), the rank letter and difficulty are separate */
+/* e = how well he plays (intelligence); the rank letter and the difficulty are separate */
 const BS=[
 {n:['Theragon','ثيراغون'],tt:['Guardian of the White Gate','حارس البوابة البيضاء'],rk:'E',df:['Easy','سهلة'],iq:['Low','منخفض'],e:1000,
  ab:[['Triple Attack','الهجوم الثلاثي'],['Every third move he strikes with all three heads: captures and checks come first. He warns you one turn ahead.','كل نقلة ثالثة يضرب برؤوسه الثلاثة: الأخذ والكش أولاً. وينبهك قبلها بدور.']],
@@ -200,7 +211,9 @@ const BS=[
  q:['Oh... you finally arrived. I wondered when someone worthy of sitting across from me would come. Are you here for me, or for your little brother? Do not worry, he is fine. But before you take him... can you defeat a man who never learned the meaning of loss?','أوه… لقد وصلت أخيراً. كنت أتساءل متى سيأتي شخص يستحق الجلوس أمامي. هل جئت من أجلي؟ أم جئت بحثاً عن أخيك الصغير؟ هاه… لا تقلق، إنه بخير. لكن قبل أن تأخذه… أريد أن أعرف شيئاً واحداً. هل تستطيع هزيمة رجل لم يعرف معنى الخسارة طوال حياته؟']}];
 const TM=[600,480,360,240,180,120],DL=[1800,1500,1200,900,600,350];  /* time per side (s) and boss speed (ms) */
 const V={p:1,n:3,b:3,r:5,q:9,k:0};
-const NP=[[150,350],[420,300],[720,270],[1000,470],[780,620],[480,570],[200,660]];
+/* positions of the gate and the six stages on the map, in percent (x,y). Use the "Place stage markers" button to set them on your map. */
+const DNP=[[22,40],[46,36],[73,34],[86,56],[68,71],[45,68],[20,76]];
+let NP=JSON.parse(localStorage.getItem('cc_np')||'null')||DNP.map(p=>p.slice());
 const PU=(c,p)=>'https://chessboardjs.com/img/chesspieces/wikipedia/'+c+p.toUpperCase()+'.png';
 let adv=JSON.parse(localStorage.getItem('cc_adv2')||'{"c":0,"seen":0}');
 const saveA=()=>localStorage.setItem('cc_adv2',JSON.stringify(adv));
@@ -246,54 +259,43 @@ function cln(src,cb){
  }catch(e){cb(src)}};
  im.onerror=()=>cb(src);im.src=src}
 
-/* world map and arenas are drawn in code. If you upload world_map.jpeg or arena_1.jpeg ... arena_6.jpeg they are used instead. */
-function world(){
- let s=1234;const r=()=>(s=s*16807%2147483647)/2147483647;
- const mt=(x,y,k)=>'<polygon points="'+(x-70*k)+','+y+' '+x+','+(y-120*k)+' '+(x+80*k)+','+y+'" fill="#3b2d5a"/><polygon points="'+x+','+(y-120*k)+' '+(x+80*k)+','+y+' '+(x+10*k)+','+y+'" fill="#2a1f45"/><polygon points="'+(x-18*k)+','+(y-92*k)+' '+x+','+(y-120*k)+' '+(x+20*k)+','+(y-88*k)+' '+(x+6*k)+','+(y-96*k)+' '+(x-6*k)+','+(y-84*k)+'" fill="#ddd8ee"/>';
- const pine=(x,y,k)=>'<polygon points="'+x+','+(y-46*k)+' '+(x-15*k)+','+(y-14*k)+' '+(x+15*k)+','+(y-14*k)+'" fill="#1d3b3a"/><polygon points="'+x+','+(y-32*k)+' '+(x-19*k)+','+y+' '+(x+19*k)+','+y+'" fill="#162f2f"/><rect x="'+(x-2*k)+'" y="'+y+'" width="'+4*k+'" height="'+8*k+'" fill="#2a1d14"/>';
- let o='<defs><linearGradient id="gg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d2347"/><stop offset="1" stop-color="#150f26"/></linearGradient><filter id="nz"><feTurbulence type="fractalNoise" baseFrequency=".012" numOctaves="3" seed="4"/><feColorMatrix values="0 0 0 0 .45 0 0 0 0 .35 0 0 0 0 .6 1 0 0 0 0"/></filter><linearGradient id="rv" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2f4f8f"/><stop offset=".5" stop-color="#5a86c8"/><stop offset="1" stop-color="#2f4f8f"/></linearGradient><radialGradient id="gl"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>';
- o+='<rect width="1200" height="800" fill="url(#gg)"/><rect width="1200" height="800" filter="url(#nz)" opacity=".28"/>';
- const zc=['#9fb2ff','#8fb8e8','#a07a50','#ff7a2a','#c46bff','#ff2a52'];
- NP.slice(1).forEach((p,i)=>{o+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="170" fill="'+zc[i]+'" opacity=".17"/>'});
- for(let i=0;i<9;i++)o+=mt(70+i*135+r()*40,150+r()*40,.8+r()*.5);
- [[330,520],[900,160],[1080,720],[110,210],[640,740],[980,330],[560,430]].forEach(c=>{for(let i=0;i<8;i++)o+=pine(c[0]+r()*110-55,c[1]+r()*70-35,.8+r()*.6)});
- o+='<path d="M300,0 C330,120 250,250 290,340 S350,520 300,660 S280,760 300,800" fill="none" stroke="#0e1a38" stroke-width="46" opacity=".7"/><path d="M300,0 C330,120 250,250 290,340 S350,520 300,660 S280,760 300,800" fill="none" stroke="url(#rv)" stroke-width="34" opacity=".9"/>';
- o+='<g stroke="#e8f0ff" stroke-width="3" opacity=".8"><line x1="290" y1="700" x2="290" y2="740"/><line x1="300" y1="700" x2="300" y2="745"/><line x1="310" y1="700" x2="310" y2="740"/></g><ellipse cx="300" cy="750" rx="40" ry="12" fill="url(#gl)"/>';
- const z=[
-  '<rect x="90" y="270" width="120" height="80" fill="#241a3a"/><rect x="80" y="230" width="26" height="120" fill="#2e2248"/><rect x="195" y="230" width="26" height="120" fill="#2e2248"/><polygon points="80,230 93,195 106,230" fill="#3a2c5a"/><polygon points="195,230 208,195 221,230" fill="#3a2c5a"/><rect x="132" y="300" width="36" height="50" fill="#7545B8" opacity=".8"/>',
-  '<rect x="330" y="250" width="150" height="70" fill="#cfd6f2"/><rect x="330" y="230" width="22" height="30" fill="#cfd6f2"/><rect x="458" y="238" width="22" height="22" fill="#cfd6f2"/><rect x="368" y="262" width="26" height="58" fill="#e8ecff"/><rect x="420" y="270" width="18" height="40" fill="#b7bfdc"/><polygon points="500,300 506,280 512,300" fill="#fff"/><polygon points="520,310 526,288 532,310" fill="#fff"/>',
-  '<ellipse cx="680" cy="190" rx="90" ry="26" fill="#d8e2ff" opacity=".35"/><ellipse cx="760" cy="215" rx="70" ry="20" fill="#d8e2ff" opacity=".3"/>'+mt(640,250,1.1)+mt(800,260,1.3),
-  [0,1,2,3,4,5,6,7].map(k=>'<polygon points="'+(930+k*18)+',540 '+(938+k*18)+','+(488-k%3*14)+' '+(946+k*18)+',540" fill="#120c0a"/>').join('')+'<ellipse cx="1000" cy="540" rx="120" ry="14" fill="#000" opacity=".4"/>',
-  '<ellipse cx="780" cy="690" rx="120" ry="30" fill="#ff4a10" opacity=".55"/><circle cx="780" cy="650" r="70" fill="#ff8a2a" opacity=".35"/>'+[0,1,2,3,4].map(k=>'<polygon points="'+(720+k*30)+',680 '+(730+k*30)+','+(630-k%2*22)+' '+(742+k*30)+',680" fill="#ffb347" opacity=".85"/>').join(''),
-  [0,1,2,3].map(k=>'<polygon points="'+(420+k*34)+',630 '+(440+k*34)+',560 '+(462+k*34)+',560 '+(442+k*34)+',630" fill="#8f5ae0" opacity=".75" stroke="#e0ccff" stroke-width="2"/>').join(''),
-  '<circle cx="250" cy="560" r="44" fill="#d02a46" opacity=".9"/><circle cx="250" cy="560" r="62" fill="#d02a46" opacity=".25"/><rect x="130" y="640" width="110" height="60" fill="#16080e"/><polygon points="130,640 160,590 190,640" fill="#1d0a12"/><polygon points="190,640 215,580 240,640" fill="#1d0a12"/>'];
- NP.forEach((p,i)=>{o+=i==0?z[0]:z[i]});
- const pts=NP.map(p=>[p[0],p[1]+40]);
- let d='M'+pts[0][0]+','+pts[0][1];
- for(let i=1;i<pts.length;i++){const a=pts[i-1],b=pts[i];d+=' Q'+(a[0]+b[0])/2+','+((a[1]+b[1])/2+(i%2?-45:45))+' '+b[0]+','+b[1]}
- o+='<path d="'+d+'" fill="none" stroke="#1a130d" stroke-width="40" stroke-linecap="round"/><path d="'+d+'" fill="none" stroke="#8c7c68" stroke-width="30" stroke-linecap="round"/><path d="'+d+'" fill="none" stroke="#b8a98f" stroke-width="3" stroke-dasharray="12 9" stroke-linecap="round"/>';
- o+='<g transform="translate(290,338) rotate(8)"><rect x="-44" y="-18" width="88" height="36" fill="#6b5a46" stroke="#1a130d" stroke-width="4"/><rect x="-44" y="-18" width="88" height="6" fill="#a8977c"/><rect x="-44" y="12" width="88" height="6" fill="#a8977c"/></g>';
- return '<svg class="wm" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">'+o+'</svg><div class="fogm" style="top:6%"></div><div class="fogm" style="top:48%;animation-duration:30s"></div><div class="fogm" style="top:78%;animation-duration:26s"></div>'}
+/* map */
 const SEAL='<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#4a3470" stroke="#C5A66A" stroke-width="3"/><rect x="21" y="30" width="22" height="17" rx="3" fill="#C5A66A"/><path d="M25 30v-6a7 7 0 0 1 14 0v6" fill="none" stroke="#C5A66A" stroke-width="4"/></svg>';
 const QM='<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#2a1a45" stroke="#C5A66A" stroke-width="3"/><text x="32" y="46" text-anchor="middle" font-size="40" font-weight="900" fill="#b99cff" font-family="Cairo">?</text></svg>';
 const GATE='<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#2a1a45" stroke="#C5A66A" stroke-width="3"/><path d="M18 46V28l6-6 4 4 4-8 4 8 4-4 6 6v18z" fill="#C5A66A"/></svg>';
 const known=i=>i<5?i<=adv.c:(i<adv.c||!!adv.met);
 function renderMap(){
- show('map');$('world').innerHTML=world();
- let h='<div class="nd cl" style="left:'+NP[0][0]/12+'%;top:'+(NP[0][1]+40)/8+'%;cursor:default"><div class="md">'+GATE+'</div><div class="pq"><b>'+t('begin')+'</b></div></div>';
+ show('map');
+ let h='<img id="wimg" src="'+MAP_FILE+'" alt="" onerror="this.style.display=\'none\';this.parentNode.style.minHeight=\'520px\'">';
+ if(!LABELS_IN_ART)h+='<div class="nd cl" style="left:'+NP[0][0]+'%;top:'+NP[0][1]+'%;cursor:default"><div class="md">'+GATE+'</div><div class="pq"><b>'+t('begin')+'</b></div></div>';
  BS.forEach((b,i)=>{
   const c=i<adv.c?'cl':i==adv.c?(adv.play===i?'pg':'av'):'lk',k=known(i),p=NP[i+1];
-  h+='<div class="nd '+c+'" style="left:'+p[0]/12+'%;top:'+(p[1]+40)/8+'%" onclick="tapStage('+i+')"><div class="md">'+(k?'<img data-b="'+i+'">':(i==5?QM:SEAL))+'</div><div class="pq">'+(k?'<span class="rk">'+b.rk+'</span>':'')+'<small>'+L(ST[i])+'</small><b>'+(k?L(b.n):t('unk'))+'</b><i>'+(k?L(b.tt):'')+'</i><span class="sttag">'+t(c)+'</span></div></div>'});
- $('world').insertAdjacentHTML('beforeend',h);
- BS.forEach((b,i)=>{if(known(i))cln(IMGS[i],u=>{const e=document.querySelector('[data-b="'+i+'"]');if(e)e.src=u})});
+  const pos='left:'+p[0]+'%;top:'+p[1]+'%';
+  if(LABELS_IN_ART)h+='<div class="nd '+c+'" style="'+pos+'" onclick="tapStage('+i+')"><div class="hit">'+(c=='cl'?'<span class="ck">✓</span>':c=='lk'?SEAL:'')+'</div></div>';
+  else h+='<div class="nd '+c+'" style="'+pos+'" onclick="tapStage('+i+')"><div class="md">'+(k?'<img data-b="'+i+'">':(i==5?QM:SEAL))+'</div><div class="pq">'+(k?'<span class="rk">'+b.rk+'</span>':'')+'<small>'+L(ST[i])+'</small><b>'+(k?L(b.n):t('unk'))+'</b><i>'+(k?L(b.tt):'')+'</i><span class="sttag">'+t(c)+'</span></div></div>'});
+ $('world').innerHTML=h;
+ if(!LABELS_IN_ART)BS.forEach((b,i)=>{if(known(i))cln(IMGS[i],u=>{const e=document.querySelector('[data-b="'+i+'"]');if(e)e.src=u})});
  const cu=document.querySelector('.nd.av,.nd.pg');if(cu)cu.scrollIntoView({inline:'center',block:'nearest'})}
 function tapStage(i){if(i>adv.c)return toast(t('lockmsg'));openBoss(i)}
 function show(id){document.querySelectorAll('.scr').forEach(e=>e.classList.toggle('on',e.id==id));$('top').style.display=id=='fight'||id=='cine'?'none':'flex';window.scrollTo(0,0)}
 
-/* cinematic */
+/* tap-to-place tool for the stage markers */
+let cal=-1,NPn=[];
+const CN=()=>[t('begin'),...BS.map((b,i)=>L(ST[i]))];
+function calMsg(){$('calh').style.display='block';$('calh').textContent=t('calp')+': '+CN()[cal]+' ('+(cal+1)+'/7)'}
+$('calb').onclick=()=>{cal=0;NPn=[];calMsg()};
+$('cald').onclick=()=>{localStorage.removeItem('cc_np');NP=DNP.map(p=>p.slice());cal=-1;$('calh').style.display='none';renderMap()};
+$('mapwrap').addEventListener('click',e=>{
+ if(cal<0)return;e.stopPropagation();e.preventDefault();
+ const r=$('world').getBoundingClientRect();
+ NPn[cal]=[+((e.clientX-r.left)/r.width*100).toFixed(1),+((e.clientY-r.top)/r.height*100).toFixed(1)];
+ cal++;
+ if(cal>6){cal=-1;NP=NPn;localStorage.setItem('cc_np',JSON.stringify(NP));$('calh').style.display='none';renderMap()}else calMsg()},true);
+
+/* arenas are drawn in code. If you upload arena_1.jpeg ... arena_6.jpeg they are used instead. */
 let bi=0;
 function particles(root,i){
- const cfg=[['#f4f6ff','fall',3],['#cfd6ff','fall',2],['#c9a070','rise',1],['#ffb347','rise',0],['#b99cff','fall',2],['#ff4a6a','fall',2]][i];
+ const cfg=[['#f4f6ff','fall'],['#cfd6ff','fall'],['#c9a070','rise'],['#ffb347','rise'],['#b99cff','fall'],['#ff4a6a','fall']][i];
  for(let k=0;k<22;k++){const p=document.createElement('span');p.className='pt';
   p.style.cssText='left:'+Math.random()*100+'%;background:'+cfg[0]+';animation-name:'+cfg[1]+';animation-duration:'+(7+Math.random()*10)+'s;animation-delay:-'+Math.random()*12+'s;'+(cfg[1]=='rise'?'top:105%':'top:-5%');
   root.appendChild(p)}}
@@ -310,6 +312,8 @@ function arenaHTML(i){
   mirrors,
   '<circle cx="600" cy="170" r="95" fill="#c8243e"/><circle cx="600" cy="170" r="135" fill="#c8243e" opacity=".25"/>'+arch('#14060c')+'<path d="M500,700 V500 q0,-70 100,-90 q100,20 100,90 V700Z" fill="#0a0408"/>'];
  return '<div class="ar" style="background:url(arena_'+(i+1)+'.jpeg) center/cover,'+BG[i]+'"><svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">'+E[i]+'</svg><div class="fgf"></div></div>'}
+
+/* cinematic */
 function openBoss(i){
  bi=i;if(i==5&&!adv.met){adv.met=1;saveA()}
  const b=BS[i];show('cine');
@@ -348,7 +352,6 @@ function fillF(){
  const b=BS[bi];
  $('fst').textContent=L(ST[bi]);$('fnm').textContent=L(b.n);$('ftt').textContent=L(b.tt);
  $('pnm').textContent=t('you');$('mls').textContent=t('mls');$('els').textContent=t('els');$('xb').textContent=t('exit');
- $('und').textContent=t('undo');$('hnt').textContent=t('hint');$('sur').textContent=t('sur');
  $('binf').innerHTML='<b style="color:var(--gd)">'+L(b.n)+'</b><div>'+t('rank')+': <b>'+b.rk+'</b></div><div>'+t('diff')+': '+L(b.df)+'</div><div>'+t('iq')+': '+L(b.iq)+'</div><div>'+t('time')+': '+fmt(TM[bi]*1000)+'</div>';
  $('abp').innerHTML='<b style="color:var(--gd)">'+t('abil')+'</b><div style="font-weight:900;margin:6px 0 2px">'+L(b.ab[0])+'</div><div style="font-size:.85rem;line-height:1.7">'+L(b.ab[1])+'</div>'}
 function buildBoard(){
@@ -415,7 +418,7 @@ function hud(){
  $('hpb').style.width=bh/10+'%';$('hpbt').textContent=bh+' / 1000';$('php').style.width=ph/10+'%';$('phpt').textContent=ph+' / 1000';
  $('tn').textContent=over?'':t(turn=='p'?'yourT':'enT');$('tn').className='fr '+(turn=='p'?'mine':'theirs');
  $('und').disabled=over||turn!='p'||undoL<=0||mlog.length<2;$('hnt').disabled=over||turn!='p'||hintsL<=0;
- $('und').textContent=t('undo')+' ('+undoL+')';$('hnt').textContent=t('hint')+' ('+hintsL+')';clocks()}
+ $('und').textContent=t('undo')+' ('+undoL+')';$('hnt').textContent=t('hint')+' ('+hintsL+')';$('sur').textContent=t('sur');clocks()}
 const sc=x=>(x.captured?V[x.captured]:0)+(x.san.includes('+')?1.5:0)+(x.san.includes('#')?99:0)-(x.captured?V[x.piece]*.1:0);
 const bestOf=a=>a.slice().sort((p,q)=>sc(q)-sc(p))[0];
 function bossMove(){
@@ -452,12 +455,13 @@ function bossMove(){
 $('und').onclick=()=>{
  if(over||turn!='p'||undoL<=0||mlog.length<2)return;
  G.undo();G.undo();mlog.pop();mlog.pop();undoL--;clk.p-=20000;bm=Math.max(0,bm-1);sel=null;last=[];hl=[];decoy=[];
- buildBoard();marks();elog(t('e_un'));$('mlog').textContent=mlog.join(' ');hud()};
+ buildBoard();marks();elog(t('e_un'));
+ let h='';for(let i=0;i<mlog.length;i+=2)h+='<div>'+(i/2+1)+'. '+mlog[i]+(mlog[i+1]?'  '+mlog[i+1]:'')+'</div>';$('mlog').innerHTML=h;hud()};
 $('hnt').onclick=()=>{
  if(over||turn!='p'||hintsL<=0)return;hintsL--;clk.p-=10000;elog(t('e_hn'));
- const ms=G.moves({verbose:true}),show=m=>{hl=[m.from,m.to];marks()};
- if(!eng||!eok){show(bestOf(ms));hud();return}
- pnd=u=>{const m=ms.find(x=>x.from+x.to==(u||'').slice(0,4));if(m)show(m)};
+ const ms=G.moves({verbose:true}),shw=m=>{hl=[m.from,m.to];marks()};
+ if(!eng||!eok){shw(bestOf(ms));hud();return}
+ pnd=u=>{const m=ms.find(x=>x.from+x.to==(u||'').slice(0,4));if(m)shw(m)};
  eng.postMessage('setoption name Skill Level value 20');eng.postMessage('position fen '+G.fen());eng.postMessage('go movetime 500');hud()};
 $('sur').onclick=()=>{if(!over)fin('l')};
 $('xb').onclick=()=>{over=true;clearInterval(tick);adv.play=bi;saveA();renderMap()};
@@ -469,10 +473,11 @@ function showEnd(){show('intro');$('ih').textContent='';say($('story'),t('end'))
 function ui(){
  document.documentElement.lang=st.lang;document.documentElement.dir=st.lang=='ar'?'rtl':'ltr';
  $('bk').textContent=t('back');$('bl').textContent=st.lang=='ar'?'English':'العربية';$('ttl').textContent=t('title');
- $('ih').textContent=t('title');$('go').textContent=t('start');$('skip').textContent=t('skip');$('cgo').textContent=t('go')}
+ $('ih').textContent=t('title');$('go').textContent=t('start');$('skip').textContent=t('skip');$('cgo').textContent=t('go');
+ $('calb').textContent=t('calb');$('cald').textContent=t('cald');$('und').textContent=t('undo');$('hnt').textContent=t('hint');$('sur').textContent=t('sur')}
 function rerender(){
  ui();const on=document.querySelector('.scr.on').id;
- if(on=='map')renderMap();else if(on=='fight'){fillF();hud();}else if(on=='cine')openBoss(bi);else if(on=='intro'&&!adv.seen){say($('story'),t('story'))}}
+ if(on=='map')renderMap();else if(on=='fight'){fillF();hud()}else if(on=='cine')openBoss(bi);else if(on=='intro'&&!adv.seen){say($('story'),t('story'))}}
 $('bl').onclick=$('gb').onclick=()=>{st.lang=st.lang=='ar'?'en':'ar';save();rerender()};
 ui();
 if(adv.seen)renderMap();else{show('intro');say($('story'),t('story'))}
