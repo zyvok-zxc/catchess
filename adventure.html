@@ -7,7 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#100D18;--dp:#211333;--mg:#7545B8;--gd:#C5A66A;--sv:#C9C5D8;--rd:#A92D45}
+:root{--bg:#100D18;--dp:#211333;--mg:#7545B8;--gd:#C5A66A;--sv:#C9C5D8;--rd:#A92D45;--lt1:#dcd7ea;--lt2:#b8b2cd;--dk1:#4a3470;--dk2:#2a1c46;--fr1:#4a3470;--fr2:#241638;--wf:drop-shadow(0 3px 3px rgba(0,0,0,.55));--bf:drop-shadow(0 3px 3px rgba(0,0,0,.55))}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--sv);font-family:Cairo,system-ui,sans-serif}
 .scr{display:none;position:relative;min-height:100vh}.scr.on{display:block}
@@ -16,7 +16,8 @@ html,body{margin:0;background:var(--bg);color:var(--sv);font-family:Cairo,system
 .fr::before{top:-5px;inset-inline-start:-5px;border-inline-end:0;border-bottom:0}
 .fr::after{bottom:-5px;inset-inline-end:-5px;border-inline-start:0;border-top:0}
 .pad{padding:10px 12px}
-.bt{font:700 1rem Cairo,sans-serif;color:#efe3c8;background:linear-gradient(#34205a,#1d1233);border:2px solid var(--gd);border-radius:8px;padding:10px 18px;cursor:pointer;box-shadow:0 4px 0 #0a0710,0 0 12px rgba(117,69,184,.4);text-decoration:none;display:inline-block}
+.bt{font:700 1rem Cairo,sans-serif;color:#f6ecd0;text-shadow:0 2px 3px #000,0 0 8px #000;background:url(CD03598A-1878-402E-9BDC-B4D8A636AD02.png) center/100% 100% no-repeat,linear-gradient(#34205a,#1d1233);border:0;border-radius:8px;padding:14px 26px;min-width:96px;cursor:pointer;text-decoration:none;display:inline-block;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6))}
+.bt.pri{background:url(D02819B5-18D0-4689-B373-78378A565AEF.png) center/100% 100% no-repeat,linear-gradient(#5a3a10,#2b1a06)}
 .bt:active{transform:translateY(2px)}.bt:disabled{opacity:.35;cursor:default}
 #top{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 12px;position:relative;z-index:5}
 #top h1{margin:0;font-size:clamp(.9rem,3vw,1.5rem);color:var(--gd);letter-spacing:1px}
@@ -85,17 +86,18 @@ details.fr{background:rgba(14,9,22,.88)}summary{cursor:pointer;color:var(--gd);f
 #elog div::before{content:"◆ ";color:var(--mg)}
 #fbig{height:min(24vh,230px);max-width:100%;object-fit:contain;filter:drop-shadow(0 0 20px var(--mg))}
 #tn{padding:5px 26px;font-weight:900;background:rgba(14,9,22,.88)}#tn.mine{color:var(--gd)}#tn.theirs{color:#e07a8f}
-#bw{position:relative;width:min(100%,max(300px,calc(100vh - 360px)));padding:8px;background:linear-gradient(#4a3470,#241638);border:3px solid var(--gd);border-radius:6px;box-shadow:0 0 0 3px #0a0710,0 14px 34px rgba(0,0,0,.75)}
+#bw{position:relative;width:min(100%,max(300px,calc(100vh - 360px)));padding:8px;background:linear-gradient(var(--fr1),var(--fr2));border:3px solid var(--gd);border-radius:6px;box-shadow:0 0 0 3px #0a0710,0 14px 34px rgba(0,0,0,.75)}
 #bd{position:relative;width:100%;aspect-ratio:1;direction:ltr;user-select:none;touch-action:none}
 .sq{position:absolute;width:12.5%;height:12.5%}
-.sq.lt{background:linear-gradient(135deg,#dcd7ea,#b8b2cd)}.sq.dk{background:linear-gradient(135deg,#4a3470,#2a1c46)}
+.sq.lt{background:linear-gradient(135deg,var(--lt1),var(--lt2))}.sq.dk{background:linear-gradient(135deg,var(--dk1),var(--dk2))}
 .sq.l{box-shadow:inset 0 0 0 100px rgba(197,166,106,.5)}.sq.s{box-shadow:inset 0 0 0 100px rgba(197,166,106,.8)}
 .sq.d::after{content:"";position:absolute;inset:34%;border-radius:50%;background:rgba(117,69,184,.85);box-shadow:0 0 8px #b99cff}
 .sq.cp::after{inset:6%;background:none;border:4px solid rgba(169,45,69,.9);box-shadow:none}
 .sq.ck{box-shadow:inset 0 0 0 100px rgba(169,45,69,.7)}
 .sq.fi{box-shadow:inset 0 0 0 100px rgba(255,110,30,.65)}.sq.fw{box-shadow:inset 0 0 0 4px #ff9a3c}
 .sq.dc{box-shadow:inset 0 0 0 3px rgba(185,156,255,.85)}.sq.hn{box-shadow:inset 0 0 0 100px rgba(90,220,150,.5)}
-.pc{position:absolute;width:12.5%;height:12.5%;transition:left .18s ease,top .18s ease,opacity .25s;cursor:grab;z-index:2;filter:drop-shadow(0 3px 3px rgba(0,0,0,.55))}
+.pc{position:absolute;width:12.5%;height:12.5%;transition:left .18s ease,top .18s ease,opacity .25s;cursor:grab;z-index:2}
+.pc.pw{filter:var(--wf)}.pc.pb{filter:var(--bf)}
 .pc.drag{transition:none;z-index:9;cursor:grabbing}
 .fx{position:absolute;width:12.5%;height:12.5%;z-index:5;pointer-events:none;border-radius:50%;animation:bst .5s forwards}
 @keyframes bst{from{box-shadow:0 0 0 0 rgba(255,220,150,.9)}to{box-shadow:0 0 0 40px rgba(255,220,150,0);transform:scale(1.5)}}
@@ -112,7 +114,7 @@ details.fr{background:rgba(14,9,22,.88)}summary{cursor:pointer;color:var(--gd);f
 <body>
 <div id="top"><a id="bk" class="bt" href="index.html"></a><h1 id="ttl"></h1><button id="bl" class="bt"></button></div>
 
-<section id="intro" class="scr"><h2 id="ih"></h2><div id="story" class="fr pad"></div><button id="go" class="bt" style="margin-top:16px"></button></section>
+<section id="intro" class="scr"><h2 id="ih"></h2><div id="story" class="fr pad"></div><button id="go" class="bt pri" style="margin-top:16px"></button></section>
 
 <section id="map" class="scr">
  <div id="mapwrap"><div id="world"></div></div>
@@ -122,7 +124,7 @@ details.fr{background:rgba(14,9,22,.88)}summary{cursor:pointer;color:var(--gd);f
 <section id="cine" class="scr">
  <div id="carena"></div><img id="cimg">
  <div id="cbt"><button id="skip" class="bt"></button></div>
- <div id="dlg" class="fr"><div id="dnm"></div><div id="dtt"></div><div id="dtx"></div><button id="cgo" class="bt" style="display:none;margin-top:8px"></button></div>
+ <div id="dlg" class="fr"><div id="dnm"></div><div id="dtt"></div><div id="dtx"></div><button id="cgo" class="bt pri" style="display:none;margin-top:8px"></button></div>
 </section>
 
 <section id="fight" class="scr">
@@ -133,7 +135,7 @@ details.fr{background:rgba(14,9,22,.88)}summary{cursor:pointer;color:var(--gd);f
    <div id="ftx"><small id="fst"></small><b id="fnm"></b><span id="ftt"></span></div>
    <div class="bar red"><i id="hpb"></i><span id="hpbt"></span></div>
    <span id="bclk" class="clk"></span>
-   <button id="gb" class="bt" style="padding:6px 12px">A/EN</button><button id="xb" class="bt" style="padding:6px 12px"></button>
+   <button id="gb" class="bt" style="padding:10px 18px">A/EN</button><button id="xb" class="bt" style="padding:10px 18px"></button>
   </div>
   <aside id="fl">
    <div class="fr pad pc2"><img id="pimg"><div style="flex:1"><b id="pnm"></b><div class="bar pur" style="margin:4px 0"><i id="php"></i><span id="phpt"></span></div><span id="pclk" class="clk"></span></div></div>
@@ -150,7 +152,7 @@ details.fr{background:rgba(14,9,22,.88)}summary{cursor:pointer;color:var(--gd);f
  </div>
 </section>
 
-<div id="res"><h2 id="rh"></h2><p id="rp" style="max-width:480px"></p><div><button id="rr" class="bt"></button> <button id="rm" class="bt"></button></div></div>
+<div id="res"><h2 id="rh"></h2><p id="rp" style="max-width:480px"></p><div><button id="rr" class="bt pri"></button> <button id="rm" class="bt pri"></button></div></div>
 <div id="toast"></div><div id="fade"></div>
 
 <script>
@@ -163,6 +165,16 @@ const L=x=>x[st.lang=='ar'?1:0];
 /* your map picture. If the stage names and boss pictures are already drawn inside the map, change false to true. */
 const MAP_FILE='9674EABB-5F0B-44AD-8702-013EC778B0DC.png';
 const LABELS_IN_ART=false;
+/* boss arena pictures, in the order you gave them (stage 1 to stage 5). Stage 6 keeps the arena drawn in code until you give me a sixth picture. */
+const ARENAS=['IMG_1989.jpeg','IMG_1988.jpeg','IMG_1987.jpeg','IMG_1986.jpeg','IMG_1985.jpeg',''];
+/* board colors (lt = light squares, dk = dark squares, fr = frame) and the glow of the white and black pieces, one set per boss */
+const TH=[
+ {lt:['#e8eef7','#c9d5e8'],dk:['#6a7da8','#3e4c75'],fr:['#9fb2e8','#2a3258'],w:'drop-shadow(0 0 5px #cfe0ff)',b:'brightness(1.15) drop-shadow(0 0 4px #8fa8e0)'},
+ {lt:['#dfe0ef','#bfc1de'],dk:['#4b4f86','#2b2e5c'],fr:['#8a8ee0','#22244a'],w:'hue-rotate(10deg) drop-shadow(0 0 5px #b9bfff)',b:'drop-shadow(0 0 5px #7a82ff)'},
+ {lt:['#d9c9a8','#bba684'],dk:['#5c4630','#3b2c1d'],fr:['#a88858','#2e2114'],w:'sepia(.45) drop-shadow(0 0 4px #e0c080)',b:'sepia(.6) brightness(.95) drop-shadow(0 0 4px #8a6a40)'},
+ {lt:['#f5d9b0','#e8b57a'],dk:['#8a3418','#4d1a0c'],fr:['#ff8a2a','#3a1208'],w:'sepia(.6) saturate(1.6) hue-rotate(-12deg) drop-shadow(0 0 6px #ff9a3c)',b:'drop-shadow(0 0 5px #ff5a14)'},
+ {lt:['#dccfee','#bba8dc'],dk:['#4a2f7d','#281649'],fr:['#b99cff','#1f1138'],w:'hue-rotate(250deg) saturate(1.3) drop-shadow(0 0 5px #d8c0ff)',b:'drop-shadow(0 0 5px #b99cff)'},
+ {lt:['#ead5da','#d1a9b4'],dk:['#6a1a2c','#38101a'],fr:['#d02a46','#2a0a12'],w:'sepia(.4) hue-rotate(-30deg) saturate(1.3) drop-shadow(0 0 5px #ff6a8a)',b:'drop-shadow(0 0 5px #d02a46)'}];
 const T={
  title:['GOTHIC FANTASY CHESS','قلعة الشطرنج الملعونة'],back:['Back','رجوع'],start:['Begin the journey','ابدأ الرحلة'],
  story:['Lucian Dracula holds your little brother in his castle. Six guardians block the road through the Cursed Chess Kingdom. Defeat them one by one, face Lucian, and bring your brother home.','لوسيان دراكولا يحتجز أخاك الصغير في قلعته. ستة حراس يسدّون الطريق في مملكة الشطرنج الملعونة. اهزمهم واحداً بعد الآخر، وواجه لوسيان، وأعد أخاك إلى البيت.'],
@@ -187,7 +199,7 @@ const T={
  e_un:['Undo used: -20 seconds.','استُخدم التراجع: -20 ثانية.'],e_hn:['Hint used: -10 seconds.','استُخدم التلميح: -10 ثوانٍ.']};
 const t=k=>L(T[k]);
 const ST=[['Stage 1','المرحلة الأولى'],['Stage 2','المرحلة الثانية'],['Stage 3','المرحلة الثالثة'],['Stage 4','المرحلة الرابعة'],['Stage 5','المرحلة الخامسة'],['Final Stage','المرحلة الأخيرة']];
-/* boss pictures: change a file name here if a picture belongs to a different boss */
+/* boss pictures, one per stage: stage 1 Theragon, 2 Valdrix, 3 Garmath, 4 Solarius, 5 Nihil, 6 Lucian. Change a file name here if a picture is on the wrong boss. */
 const IMGS=['IMG_1937.jpeg','IMG_1938.jpeg','IMG_1939.jpeg','IMG_1934.jpeg','IMG_1935.jpeg','IMG_1936.jpeg'];
 /* e = how well he plays (intelligence); the rank letter and the difficulty are separate */
 const BS=[
@@ -230,31 +242,44 @@ function say(el,s,done){clearInterval(tw);el.textContent='';let i=0;
   const c=s[i++];el.textContent=s.slice(0,i);if(c!=' ')tone(170+Math.random()*80,.05,.04)},32)}
 function toast(m){const e=$('toast');e.textContent=m;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
 
-/* background removal for the boss pictures */
+/* background removal for the boss pictures: it spreads in from the edges across smooth areas and stops at the character's outline,
+   then drops small leftover specks and trims one pixel off the edge */
 const CC={};
 function cln(src,cb){
  if(CC[src])return cb(CC[src]);
  const im=new Image();
  im.onload=()=>{try{
-  const k=Math.min(1,520/Math.max(im.naturalWidth,im.naturalHeight)),w=Math.round(im.naturalWidth*k),h=Math.round(im.naturalHeight*k);
+  const k=Math.min(1,560/Math.max(im.naturalWidth,im.naturalHeight)),w=Math.round(im.naturalWidth*k),h=Math.round(im.naturalHeight*k),N=w*h;
   const c=document.createElement('canvas');c.width=w;c.height=h;
   const x=c.getContext('2d');x.drawImage(im,0,0,w,h);
-  const d=x.getImageData(0,0,w,h),p=d.data,cs=[0,w-1,(h-1)*w,h*w-1];
-  const bg=[0,1,2].map(j=>cs.reduce((a,i)=>a+p[i*4+j],0)/4);
-  const dist=i=>Math.hypot(p[i*4]-bg[0],p[i*4+1]-bg[1],p[i*4+2]-bg[2]);
-  const seen=new Uint8Array(w*h),stack=[];
-  const push=i=>{if(!seen[i]&&dist(i)<60){seen[i]=1;stack.push(i)}};
-  for(let a=0;a<w;a++){push(a);push((h-1)*w+a)}
-  for(let b=0;b<h;b++){push(b*w);push(b*w+w-1)}
-  while(stack.length){const i=stack.pop(),cx=i%w,cy=(i/w)|0;
-   if(cx>0)push(i-1);if(cx<w-1)push(i+1);if(cy>0)push(i-w);if(cy<h-1)push(i+w)}
-  let keep=new Uint8Array(w*h);
-  for(let i=0;i<w*h;i++)keep[i]=seen[i]?0:1;
-  for(let r=0;r<3;r++){const nk=keep.slice();
-   for(let i=0;i<w*h;i++){if(keep[i])continue;const cx=i%w,cy=(i/w)|0;
-    if((cx>0&&keep[i-1])||(cx<w-1&&keep[i+1])||(cy>0&&keep[i-w])||(cy<h-1&&keep[i+w]))nk[i]=1}
-   keep=nk}
-  for(let i=0;i<w*h;i++)p[i*4+3]=keep[i]?255:0;
+  const d=x.getImageData(0,0,w,h),p=d.data;
+  const df=(i,j)=>Math.abs(p[i*4]-p[j*4])+Math.abs(p[i*4+1]-p[j*4+1])+Math.abs(p[i*4+2]-p[j*4+2]);
+  const cs=[0,w-1,(h-1)*w,N-1],bg=[0,1,2].map(j=>cs.reduce((a,i)=>a+p[i*4+j],0)/4);
+  const far=i=>Math.abs(p[i*4]-bg[0])+Math.abs(p[i*4+1]-bg[1])+Math.abs(p[i*4+2]-bg[2]);
+  const seen=new Uint8Array(N),stk=[];
+  const add=(j,i)=>{if(!seen[j]&&(i<0?far(j)<120:(df(i,j)<26&&far(j)<300))){seen[j]=1;stk.push(j)}};
+  for(let a=0;a<w;a++){add(a,-1);add((h-1)*w+a,-1)}
+  for(let b=0;b<h;b++){add(b*w,-1);add(b*w+w-1,-1)}
+  while(stk.length){const i=stk.pop(),cx=i%w,cy=(i/w)|0;
+   if(cx>0)add(i-1,i);if(cx<w-1)add(i+1,i);if(cy>0)add(i-w,i);if(cy<h-1)add(i+w,i)}
+  const lab=new Int32Array(N),sz=[0];let nl=0;
+  for(let s=0;s<N;s++){
+   if(seen[s]||lab[s])continue;
+   nl++;let n=0;const q=[s];lab[s]=nl;
+   while(q.length){
+    const i=q.pop();n++;const cx=i%w,cy=(i/w)|0;
+    const nb=[cx>0?i-1:-1,cx<w-1?i+1:-1,cy>0?i-w:-1,cy<h-1?i+w:-1];
+    for(let z=0;z<4;z++){const j=nb[z];if(j>=0&&!seen[j]&&!lab[j]){lab[j]=nl;q.push(j)}}}
+   sz[nl]=n}
+  let mx=0;for(let i=1;i<sz.length;i++)if(sz[i]>mx)mx=sz[i];
+  const keep=new Uint8Array(N);
+  for(let i=0;i<N;i++)keep[i]=(!seen[i]&&sz[lab[i]]>=mx*.08)?1:0;
+  const ek=keep.slice();
+  for(let i=0;i<N;i++){
+   if(!keep[i])continue;
+   const cx=i%w,cy=(i/w)|0;
+   if(cx==0||cy==0||cx==w-1||cy==h-1||!keep[i-1]||!keep[i+1]||!keep[i-w]||!keep[i+w])ek[i]=0}
+  for(let i=0;i<N;i++)p[i*4+3]=ek[i]?255:0;
   x.putImageData(d,0,0);CC[src]=c.toDataURL('image/png');cb(CC[src])
  }catch(e){cb(src)}};
  im.onerror=()=>cb(src);im.src=src}
@@ -292,7 +317,7 @@ $('mapwrap').addEventListener('click',e=>{
  cal++;
  if(cal>6){cal=-1;NP=NPn;localStorage.setItem('cc_np',JSON.stringify(NP));$('calh').style.display='none';renderMap()}else calMsg()},true);
 
-/* arenas are drawn in code. If you upload arena_1.jpeg ... arena_6.jpeg they are used instead. */
+/* arenas: your pictures if given, otherwise drawn in code */
 let bi=0;
 function particles(root,i){
  const cfg=[['#f4f6ff','fall'],['#cfd6ff','fall'],['#c9a070','rise'],['#ffb347','rise'],['#b99cff','fall'],['#ff4a6a','fall']][i];
@@ -300,8 +325,9 @@ function particles(root,i){
   p.style.cssText='left:'+Math.random()*100+'%;background:'+cfg[0]+';animation-name:'+cfg[1]+';animation-duration:'+(7+Math.random()*10)+'s;animation-delay:-'+Math.random()*12+'s;'+(cfg[1]=='rise'?'top:105%':'top:-5%');
   root.appendChild(p)}}
 function arenaHTML(i){
- const arch=c=>{let o='';for(let k=0;k<8;k++){const x=k*160-20;o+='<path d="M'+x+',700 V390 Q'+x+',310 '+(x+60)+',260 Q'+(x+120)+',310 '+(x+120)+',390 V700Z" fill="'+c+'"/>'}return o};
  const BG=['linear-gradient(#3a4468,#171b30 60%,#0b0d18)','linear-gradient(#232844,#3b2f5c 55%,#120e22)','linear-gradient(#3a2a26,#1d1514 60%,#0c0807)','linear-gradient(#5a1d12,#2a0d0a 55%,#100505)','linear-gradient(#2a1a4a,#150d2a 55%,#080512)','linear-gradient(#3a0d1c,#1a0812 55%,#09040a)'];
+ if(ARENAS[i])return '<div class="ar" style="background:url('+ARENAS[i]+') center/cover,'+BG[i]+'"><div class="fgf"></div></div>';
+ const arch=c=>{let o='';for(let k=0;k<8;k++){const x=k*160-20;o+='<path d="M'+x+',700 V390 Q'+x+',310 '+(x+60)+',260 Q'+(x+120)+',310 '+(x+120)+',390 V700Z" fill="'+c+'"/>'}return o};
  const spikes=[0,1,2,3,4,5,6,7,8,9,10,11].map(k=>'<polygon points="'+(k*100)+',700 '+(k*100+14)+','+(560-k%3*30)+' '+(k*100+30)+',700"/>').join('');
  const mirrors=[0,1,2,3,4].map(k=>'<polygon points="'+(60+k*230)+',160 '+(150+k*230)+',130 '+(150+k*230)+',630 '+(60+k*230)+',660" fill="#3d2a6e" stroke="#b99cff" stroke-width="3" opacity=".7"/><polygon points="'+(80+k*230)+',180 '+(100+k*230)+',172 '+(100+k*230)+',600 '+(80+k*230)+',610" fill="#fff" opacity=".12"/>').join('');
  const E=[
@@ -331,6 +357,10 @@ const FL='abcdefgh';
 let G,sel=null,last=[],over=true,turn='p',bm=0,clk={p:0,b:0},act=null,tick=null,eng=null,eok=false,pnd=null,drag=null,hintsL=3,undoL=2,ab={},decoy=[],hl=[],mlog=[],lastP=null,sty='mix',busy=false;
 const pos=(e,s)=>{e.style.left=(s.charCodeAt(0)-97)*12.5+'%';e.style.top=(8-+s[1])*12.5+'%';e.dataset.s=s};
 const pcAt=s=>[...document.querySelectorAll('#bd .pc')].find(e=>e.dataset.s==s&&!e.dataset.dead);
+function applyTheme(i){
+ const h=TH[i],s=$('bw').style,sh=' drop-shadow(0 3px 3px rgba(0,0,0,.55))';
+ s.setProperty('--lt1',h.lt[0]);s.setProperty('--lt2',h.lt[1]);s.setProperty('--dk1',h.dk[0]);s.setProperty('--dk2',h.dk[1]);
+ s.setProperty('--fr1',h.fr[0]);s.setProperty('--fr2',h.fr[1]);s.setProperty('--wf',h.w+sh);s.setProperty('--bf',h.b+sh)}
 function startEng(){
  if(eng)return;
  fetch('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js').then(r=>r.text()).then(x=>{
@@ -343,7 +373,7 @@ function startFight(){
  const b=BS[bi];startEng();
  G=new Chess();sel=null;last=[];over=false;turn='p';bm=0;busy=false;decoy=[];hl=[];lastP=null;sty='mix';ab={};hintsL=3;undoL=2;mlog=[];
  clk.p=clk.b=TM[bi]*1000;act='p';adv.play=bi;saveA();
- show('fight');$('farena').innerHTML=arenaHTML(bi);particles($('farena'),bi);
+ show('fight');$('farena').innerHTML=arenaHTML(bi);particles($('farena'),bi);applyTheme(bi);
  cln(IMGS[bi],u=>{$('fth').src=u;$('fbig').src=u});cln('IMG_1785.jpeg',u=>$('pimg').src=u);
  $('mlog').textContent='';$('elog').textContent='';$('res').style.display='none';
  fillF();buildBoard();marks();elog(t('fight').replace('{b}',L(b.n)));
@@ -358,7 +388,7 @@ function buildBoard(){
  const bd=$('bd');bd.innerHTML='';
  for(let y=0;y<8;y++)for(let x=0;x<8;x++){const s=document.createElement('div');s.className='sq '+((x+y)%2?'dk':'lt');s.id='q'+FL[x]+(8-y);s.style.left=x*12.5+'%';s.style.top=y*12.5+'%';bd.appendChild(s)}
  G.board().forEach((row,y)=>row.forEach((p,x)=>{if(p)addPc(p.color,p.type,FL[x]+(8-y))}))}
-function addPc(c,ty,s){const e=document.createElement('img');e.className='pc';e.src=PU(c,ty);e.draggable=false;pos(e,s);$('bd').appendChild(e);return e}
+function addPc(c,ty,s){const e=document.createElement('img');e.className='pc '+(c=='w'?'pw':'pb');e.src=PU(c,ty);e.draggable=false;pos(e,s);$('bd').appendChild(e);return e}
 function kingSq(c){const b=G.board();for(let y=0;y<8;y++)for(let x=0;x<8;x++){const p=b[y][x];if(p&&p.type=='k'&&p.color==c)return FL[x]+(8-y)}}
 function marks(){
  document.querySelectorAll('#bd .sq').forEach(e=>e.classList.remove('l','s','d','cp','ck','fi','fw','dc','hn'));
